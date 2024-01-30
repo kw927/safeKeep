@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id       Int           @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  email         String        @unique
+  password_hash String
+  totp_secret   String?
+  totp_enabled  Boolean       @default(false)
+  public_key    String?
+  created_at    DateTime
+  updated_at    DateTime
+  items         Item[]
+  folders       Folder[]
+  web3_wallets  Web3Wallet[]
+  challenges    Challenge[]
+}
+
+model Item {
+  item_id     Int       @id @default(autoincrement())
+  user_id     Int
+  name        String
+  description String
+  folder_id   Int?
+  data        String
+  salt        String
+  is_favorite Boolean
+  is_deleted  Boolean
+  created_at  DateTime
+  updated_at  DateTime
+  user        User      @relation(fields: [user_id], references: [user_id])
+  folder      Folder?   @relation(fields: [folder_id], references: [folder_id])
+  item_tags   ItemTag[]
+  files       File[]
+}
+
+model Folder {
+  folder_id        Int       @id @default(autoincrement())
+  user_id          Int
+  name             String
+  parent_folder_id Int?
+  created_at       DateTime
+  updated_at       DateTime
+  user             User      @relation(fields: [user_id], references: [user_id])
+  parent_folder    Folder?   @relation("ParentChild", fields: [parent_folder_id], references: [folder_id])
+  child_folders    Folder[]  @relation("ParentChild")
+  items            Item[]
+}
+
+model Tag {
+  tag_id     Int       @id @default(autoincrement())
+  name       String
+  item_tags  ItemTag[]
+}
+
+model ItemTag {
+  item_id   Int
+  tag_id    Int
+  item      Item    @relation(fields: [item_id], references: [item_id])
+  tag       Tag     @relation(fields: [tag_id], references: [tag_id])
+
+  @@id([item_id, tag_id])
+}
+
+model File {
+  file_id           Int    @id @default(autoincrement())
+  item_id           Int
+  original_file_name String
+  original_file_type String
+  file_path         String
+  salt              String
+  item              Item   @relation(fields: [item_id], references: [item_id])
+}
+
+model Web3Wallet {
+  wallet_id        Int      @id @default(autoincrement())
+  user_id          Int
+  encrypted_wallet String
+  wallet_name      String
+  created_at       DateTime
+  updated_at       DateTime
+  user             User     @relation(fields: [user_id], references: [user_id])
+}
+
+// Storage the challenge for verifying the user's signed challenge against the public public_key
+// Storaging the challenge in database instead of in-memory store because the application will be deployed to serverless enivoronment
+model Challenge {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  challenge String
+  expires   DateTime
+
+  user             User     @relation(fields: [user_id], references: [user_id])
+
+  @@index([user_id], name: "userIdIndex")
+}

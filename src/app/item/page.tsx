@@ -1,11 +1,11 @@
 
 import React from 'react';
 import MainLayout from '@/components/main-layout';
-
 import { getServerSession } from 'next-auth/next';
 import { PrismaClient, Item } from '@prisma/client';
 import { ListItem } from '@/types/Item';
 import ContentHeader from '@/components/content-header';
+import AllItems from '@/components/all-items';
 
 // Declare the prisma client
 const prisma = new PrismaClient();
@@ -44,6 +44,8 @@ const getAllItems = async () => {
             items.forEach(item => {
                 listItems.push(getItemDetail(item));
             });
+
+            console.log('Items:', listItems)
 
             return listItems;
         }
@@ -85,8 +87,9 @@ const getItemDetail = (item: Item) => {
     const bgColor = getColorByName(item.name);
 
     const listItem: ListItem = {
+        id: item.item_id,
         name: item.name,
-        description: item.description,
+        description: item.description ?? '', // Use nullish coalescing operator to provide a default value if it is null or undefined
         initials,
         color: bgColor
     };
@@ -98,11 +101,14 @@ const AllItem = async () => {
 
     return (
         <>
-            <MainLayout>
+            <MainLayout showSearchBar={true}>
                 <ContentHeader title="All Items" button="add-item" />
 
-                <div className="relative flex justify-center items-center" style={{ height: 'calc(100vh - 144px)' }}>
-                    all items
+                <div className="relative flex justify-center pt-10" style={{ height: 'calc(100vh - 144px)' }}>
+                    {items && (
+                        <AllItems items={items} />
+                    )}
+                    
                 </div>
             </MainLayout>
         </>

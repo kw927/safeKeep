@@ -31,10 +31,9 @@ model Item {
   item_id     Int       @id @default(autoincrement())
   user_id     Int
   name        String
-  description String
+  description String?
   folder_id   Int?
-  data        String
-  salt        String
+  data        String    @db.Text
   is_favorite Boolean
   is_deleted  Boolean
   created_at  DateTime
@@ -53,14 +52,12 @@ model Folder {
   created_at       DateTime
   updated_at       DateTime
   user             User      @relation(fields: [user_id], references: [user_id])
-  parent_folder    Folder?   @relation("ParentChild", fields: [parent_folder_id], references: [folder_id])
-  child_folders    Folder[]  @relation("ParentChild")
   items            Item[]
 }
 
 model Tag {
   tag_id     Int       @id @default(autoincrement())
-  name       String
+  name       String    @unique
   item_tags  ItemTag[]
 }
 

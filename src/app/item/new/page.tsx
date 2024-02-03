@@ -2,18 +2,15 @@
 import React from 'react';
 import MainLayout from '@/components/main-layout';
 import ContentHeader from '@/components/content-header';
-
-
+import NewItemForm from '@/components/new-item-form';
 
 const AddItem = async () => {
     return (
         <>
-            <MainLayout>
+            <MainLayout showSearchBar={false}>
                 <ContentHeader title="Add Item" />
-
-                <div className="relative flex justify-center items-center" style={{ height: 'calc(100vh - 144px)' }}>
-                    add item
-                </div>
+                
+                <NewItemForm />
             </MainLayout>
         </>
     );

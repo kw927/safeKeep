@@ -4,50 +4,6 @@ import fs from 'fs';
 import { generateKey, generateSalt, KEY_SIZE, SALT_SIZE, ITERATIONS } from './cryptoUtil';
 
 /**
- * Function to encrypt plain text such as TOTP secret
- * @param text 
- * @param encryptionKey 
- * @returns 
- */
-export const encryptText = (text: string, encryptionKey: string) => {
-    // Generate a random salt
-    const salt = generateSalt(SALT_SIZE);
-
-    // Generate the key
-    const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
-
-    // Encrypt the text
-    const encryptedText = CryptoJS.AES.encrypt(text, key.toString());
-
-    // Concatenate the salt and the encrypted Text
-    return salt.toString() + encryptedText.toString();
-}
-
-/**
- * Function to decrypt encrypted text such as TOTP secret
- * @param text 
- * @param encryptionKey 
- * @returns 
- */
-export const decryptText = (text: string, encryptionKey: string) => {
-    // Extract the salt from the text
-    const salt = CryptoJS.enc.Hex.parse(text.substring(0, 32));
-
-    // Extract the encrypted TOTP secret from the text
-    const encryptedText = text.substring(32);
-
-    // Generate the key
-    const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
-
-
-    // Decrypt the text
-    const decryptedText = CryptoJS.AES.decrypt(encryptedText, key.toString());
-
-    // Return the decrypted Text
-    return decryptedText.toString(CryptoJS.enc.Utf8);
-}
-
-/**
  * Function to encrypt a file
  * @param file 
  * @param encryptionKey 

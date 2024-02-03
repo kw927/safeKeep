@@ -31,7 +31,7 @@ const ContentHeader = ({ title, button }: ContentHeadertProps) => {
     }
 
     return (
-        <div className="py-10">
+        <>
             <header>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">{title}</h1>
@@ -46,7 +46,7 @@ const ContentHeader = ({ title, button }: ContentHeadertProps) => {
                     )}
                 </div>
             </header>
-        </div>
+        </>
     );
 }
 

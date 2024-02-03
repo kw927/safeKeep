@@ -5,7 +5,7 @@ import SidebarMenu from './sidebar-menu';
 import TopNavAndContent from './top-nav-and-content';
 import { LayoutProps } from '@/types/Layout';
 
-const MainLayout = ({children}:LayoutProps) => {
+const MainLayout = ({children, showSearchBar}:LayoutProps) => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     return (
@@ -15,7 +15,7 @@ const MainLayout = ({children}:LayoutProps) => {
                 
                 <SidebarMenu sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-                <TopNavAndContent children={children} setSidebarOpen={setSidebarOpen} showSearchBar={true} />
+                <TopNavAndContent children={children} setSidebarOpen={setSidebarOpen} showSearchBar={showSearchBar} />
             </div>
         </>
     )

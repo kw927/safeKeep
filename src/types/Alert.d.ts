@@ -10,3 +10,22 @@ export interface AlertState {
     title: string;
     messages: string[];
 }
+
+export interface AlertDialogState {
+    show: boolean;
+    type: 'error' | 'success';
+    title: string;
+    message: string;
+    buttonText: string;
+    onButtonClick: () => void;
+}
+
+export interface AlertDialogProps {
+    open: boolean;
+    setOpen: (show: boolean) => void;
+    type: 'error' | 'success';
+    title: string;
+    message: string;
+    buttonText: string;
+    onButtonClick: () => void;
+}

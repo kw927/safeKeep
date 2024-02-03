@@ -114,7 +114,7 @@ const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavPro
                 </div>
 
                 <main className="py-10 w-full">
-                    <div className="px-4 sm:px-6 lg:px-8">
+                    <div className="px-4 sm:px-6 lg:px-8 py-10">
                         {children}
                     </div>
                 </main>

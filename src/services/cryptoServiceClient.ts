@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { ec as EC } from 'elliptic';
 import { generateKey, generateSalt, convertBase64ToWordArray, KEY_SIZE, SALT_SIZE, ITERATIONS } from './cryptoUtil';
-import { EncryptedFile } from '@/types/Crypto';
+import { EncryptedFile, DecryptedFile } from '@/types/Crypto';
 
 export const generatePublicKey = (privateKey: string) => {
     const ec = new EC('secp256k1');
@@ -110,18 +110,20 @@ export const encryptText = (text: string, encryptionKey: string) => {
     return salt.toString() + encryptedText.toString();
 }
 
-export const encryptTextWithDerivedKey = (text: string, derivedKey: string) => {
-    // Generate a random salt
-    const salt = generateSalt(SALT_SIZE);
+// export const encryptTextWithDerivedKey = (text: string, derivedKey: string) => {
+//     // Generate a random salt
+//     const salt = generateSalt(SALT_SIZE);
 
-    const key = convertBase64ToWordArray(derivedKey);
+//     // const key = convertBase64ToWordArray(derivedKey);
+//     // Generate the key
+//     const key = generateKey(derivedKey, salt, KEY_SIZE, ITERATIONS);
 
-    // Encrypt the text
-    const encryptedText = CryptoJS.AES.encrypt(text, key.toString());
+//     // Encrypt the text
+//     const encryptedText = CryptoJS.AES.encrypt(text, key.toString());
 
-    // Concatenate the salt and the encrypted Text
-    return salt.toString() + encryptedText.toString();
-}
+//     // Concatenate the salt and the encrypted Text
+//     return salt.toString() + encryptedText.toString();
+// }
 
 /**
  * Function to decrypt encrypted text such as TOTP secret
@@ -147,21 +149,21 @@ export const decryptText = (text: string, encryptionKey: string) => {
     return decryptedText.toString(CryptoJS.enc.Utf8);
 }
 
-export const decryptTextWithDerivedKey = (text: string, derivedKey: string) => {
-    // Extract the salt from the text
-    const salt = CryptoJS.enc.Hex.parse(text.substring(0, 32));
+// export const decryptTextWithDerivedKey = (text: string, derivedKey: string) => {
+//     // Extract the salt from the text
+//     const salt = CryptoJS.enc.Hex.parse(text.substring(0, 32));
 
-    // Extract the encrypted TOTP secret from the text
-    const encryptedText = text.substring(32);
+//     // Extract the encrypted TOTP secret from the text
+//     const encryptedText = text.substring(32);
 
-    const key = convertBase64ToWordArray(derivedKey);
+//     const key = convertBase64ToWordArray(derivedKey);
 
-    // Decrypt the text
-    const decryptedText = CryptoJS.AES.decrypt(encryptedText, key.toString());
+//     // Decrypt the text
+//     const decryptedText = CryptoJS.AES.decrypt(encryptedText, key.toString());
 
-    // Return the decrypted Text
-    return decryptedText.toString(CryptoJS.enc.Utf8);
-}
+//     // Return the decrypted Text
+//     return decryptedText.toString(CryptoJS.enc.Utf8);
+// }
 
 /**
  * Function to encrypt a file
@@ -170,7 +172,7 @@ export const decryptTextWithDerivedKey = (text: string, derivedKey: string) => {
  * @param filePath 
  * @returns 
  */
-export const encryptFileWithDerivedKey = async (file: File, derivedKey: string): Promise<EncryptedFile | null> => {
+export const encryptFile = async (file: File, encryptionKey: string): Promise<EncryptedFile | null> => {
     try {
         // Convert the file to a buffer
         const bytes = await file.arrayBuffer();
@@ -183,7 +185,7 @@ export const encryptFileWithDerivedKey = async (file: File, derivedKey: string):
         const salt = generateSalt(SALT_SIZE);
 
         // Generate the key
-        const key = generateKey(derivedKey, salt, KEY_SIZE, ITERATIONS);
+        const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
 
         // Encrypt the file data
         const encryptedFile = CryptoJS.AES.encrypt(wordArray, key.toString());
@@ -199,6 +201,34 @@ export const encryptFileWithDerivedKey = async (file: File, derivedKey: string):
         return encryptedData;
     } catch (error) {
         console.error('File processing error:', error);
+        return null;
+    }
+}
+
+export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: string): Promise<DecryptedFile | null> => {
+    try {
+        // Extract the ciphertext, salt, filename and filetype from the encrypted data
+        const ciphertext = encryptedData.ciphertext;
+        const salt = CryptoJS.enc.Hex.parse(encryptedData.salt);
+        const filename = encryptedData.filename;
+
+        // Re-generate the key (using the same password and salt)
+        const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
+
+        // Decrypt the file data
+        const decryptedWordArray = CryptoJS.AES.decrypt(ciphertext, key.toString());
+
+        // If the file is not a text file, handle as binary
+        const decryptedBuffer = Buffer.from(decryptedWordArray.toString(CryptoJS.enc.Base64), 'base64');
+
+        const decryptedFile: DecryptedFile = {
+            decryptedBuffer: decryptedBuffer,
+            filename: filename,
+            filetype: encryptedData.filetype
+        };
+
+        return decryptedFile;
+    } catch (error) {
         return null;
     }
 }

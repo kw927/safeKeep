@@ -4,3 +4,9 @@ export interface EncryptedFile {
     filename: string;
     filetype: string;
 };
+
+export interface DecryptedFile {
+    decryptedBuffer: Buffer;
+    filename: string;
+    filetype: string;
+};

@@ -6,6 +6,9 @@ import { verifySignature } from '@/services/cryptoService';
 
 const prisma = new PrismaClient();
 
+// TODO: Add rate limiting
+// TODO: Block user after n failed attempts
+
 const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
     if (req.method !== 'POST') {

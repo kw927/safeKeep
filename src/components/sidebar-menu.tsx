@@ -12,7 +12,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { SidebarProps } from '@/types/Sidebar'
 
 const navigation = [
-    { name: 'All Items', href: '#', icon: FolderIcon, current: true },
+    { name: 'All Items', href: '/item', icon: FolderIcon, current: true },
     { name: 'Item 1', href: '#', icon: ServerIcon, current: false },
     { name: 'Item 2', href: '#', icon: SignalIcon, current: false },
     { name: 'Item 3', href: '#', icon: GlobeAltIcon, current: false },

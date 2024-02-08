@@ -16,6 +16,8 @@ const ContentHeader = ({ title, button }: ContentHeadertProps) => {
     if (button) {
         if (button === 'add-item') {
             buttonText = 'Add Item';
+        } else if (button.startsWith('edit-item')) {
+            buttonText = 'Edit Item';
         }
     }
 
@@ -28,12 +30,19 @@ const ContentHeader = ({ title, button }: ContentHeadertProps) => {
             // Redirect to the add item page
             router.push('/item/new');
         }
+
+        if (button.startsWith('edit-item')) {
+            // Extract the item id from the button id e.g. edit-item-1
+            const itemId = button.split('-')[2];
+            // Redirect to the add folder page
+            router.push(`/item/edit/${itemId}`);
+        }
     }
 
     return (
         <>
             <header>
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                <div className="mx-auto max-w-7xl flex justify-between items-center">
                     <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">{title}</h1>
                     {button && (
                         <button

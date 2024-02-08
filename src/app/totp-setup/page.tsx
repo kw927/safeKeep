@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { authenticator } from 'otplib';
-import { encryptText, decryptText } from '../../services/cryptoService';
+import { encryptText, decryptText } from '../../services/cryptoServiceClient';
 import qrcode from 'qrcode';
 import TOTPSetps from '../../components/totp-steps';
 import { TOTPData } from '@/types/Totp';

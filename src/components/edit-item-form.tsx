@@ -12,6 +12,9 @@ import { useRouter } from 'next/navigation';
 import AlertDialog from './alert-dialog';
 import { AlertDialogState } from '@/types/Alert';
 import LoadingModal from './loading-modal';
+import { ItemProps } from '@/types/Item';
+import { decryptText, decryptFile } from '@/services/cryptoServiceClient';
+import { DecryptedFile, EncryptedFile } from '@/types/Crypto';
 
 const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
@@ -39,13 +42,13 @@ const getFolders = async (): Promise<FolderHierarchy> => {
     }
 }
 
-const NewItemForm = () => {
+const EditItemForm = ({ item }: ItemProps) => {
     const rootFolder: ComboboxFolder = { id: 0, name: 'Root Folder', parent_folder_id: 0 };
     const [isLoading, setIsLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState('Decrypting Data...');
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [sensitiveData, setSensitiveData] = useState('');
+    const [title, setTitle] = useState(item.name);
+    const [description, setDescription] = useState(item.description);
+    const [sensitiveData, setSensitiveData] = useState(item.data);
     const [query, setQuery] = useState('')
     const [files, setFiles] = useState<File[]>([]);
     const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
@@ -60,7 +63,6 @@ const NewItemForm = () => {
     const [selectedParentFolder, setSelectedParentFolder] = useState({ id: 0, name: '', parent_folder_id: 0 });
 
     const router = useRouter();
-
 
     useEffect(() => {
         /**
@@ -86,9 +88,51 @@ const NewItemForm = () => {
             setRootFolders(folders.rootFolders);
         };
 
+        const decryptData = async (data: string, masterPassword: string) => {
+            const decryptedData = await decryptText(data, masterPassword);
+            setSensitiveData(decryptedData);
+        }
+
+        const decryptFiles = async (encryptedFiles: EncryptedFile[], masterPassword: string) => {
+            // Decrypt all the files
+            const decryptedFilesPromises = encryptedFiles.map(async (file) => {
+                const decryptedFile = await decryptFile(file, masterPassword);
+                return decryptedFile ? {
+                    ...decryptedFile,
+                    arrayBuffer: decryptedFile.decryptedBuffer.buffer.slice(
+                        decryptedFile.decryptedBuffer.byteOffset,
+                        decryptedFile.decryptedBuffer.byteOffset + decryptedFile.decryptedBuffer.byteLength
+                    )
+                } : null;
+            });
+        
+            // Await all the files to be decrypted
+            const decryptedFiles = await Promise.all(decryptedFilesPromises);
+        
+            // Prevent adding duplicate files to the state since useEffect will run twice in development mode
+            setFiles(prevFiles => {
+                const updatedFiles = [...prevFiles];
+                decryptedFiles.forEach(decryptedFile => {
+                    if (decryptedFile && !prevFiles.some(file => file.name === decryptedFile.filename)) {
+                        const newFile = new File([decryptedFile.arrayBuffer], decryptedFile.filename, {type: decryptedFile.filetype});
+                        updatedFiles.push(newFile);
+                    }
+                });
+                return updatedFiles;
+            });
+        };
+
+        const setTagsFromItem = () => {
+            if (item.item_tags.length > 0) {
+                setTags(item.item_tags.map(tag => tag.tag.name));
+            }
+        }
+
         const initializeComponent = async () => {
             try {
-                await Promise.all([checkMasterPassword(), fetchFoldersAsync()]);
+                const masterPasswordFromServiceWorker = await checkMasterPassword();
+
+                await Promise.all([decryptData(item.data, masterPasswordFromServiceWorker), decryptFiles(item.files, masterPasswordFromServiceWorker), fetchFoldersAsync(), setTagsFromItem()]);
             } catch (error) {
                 console.error('Initialization failed:', error);
                 setIsLoading(false);
@@ -99,6 +143,16 @@ const NewItemForm = () => {
 
         initializeComponent();
     }, []);
+
+    useEffect(() => {
+        if (item.folder?.folder_id ?? 0 > 0) {
+            // Find the folder in the folders list
+            const folder = folders.find(folder => folder.id === item.folder?.folder_id);
+            if (folder) {
+                setSelectedFolder(folder);
+            }
+        };
+    }, [folders]);
 
     const filteredFolders =
         query === ''
@@ -134,7 +188,6 @@ const NewItemForm = () => {
      */
     const onFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
-
             const validFiles = Array.from(event.target.files).filter(
                 (file) => file.size <= 10 * 1024 * 1024 // File size is 10MB or less
             );
@@ -211,7 +264,7 @@ const NewItemForm = () => {
         }
 
         // Check if the description is valid (the description is optional)
-        if (description.length > 191) {
+        if (description && description.length > 191) {
             console.log('Description is too long');
             return;
         }
@@ -260,6 +313,7 @@ const NewItemForm = () => {
 
         // Construct the request body
         const requestBody = {
+            itemId: item.item_id,
             name: title,
             description,
             data: encryptedSensitiveData,
@@ -268,11 +322,11 @@ const NewItemForm = () => {
             tags
         };
 
-        setLoadingMessage('Creating Item...');
+        setLoadingMessage('Saving Data...');
 
         // Send the request to the API
         const res = await fetch('/api/item', {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -285,21 +339,24 @@ const NewItemForm = () => {
             const alert: AlertDialogState = {
                 show: true,
                 type: 'success',
-                title: 'Item Created',
-                message: 'The item has been created successfully.',
+                title: 'Item Updated',
+                message: 'The item has been updated successfully.',
                 buttonText: 'OK',
                 onButtonClick: () => {
                     // Close the alert dialog
                     setAlertDialog({ ...alert, show: false });
 
-                    // Redirect the user to the item page with the new item id from res.data.itemId
-                    router.push(`/item/${data.itemId}`);
+                    // Redirect the user to the item page
+                    // Use window.location.href to force a reload of the items
+                    window.location.href = `/item/${item.item_id}`;
                 }
             };
 
+            setIsLoading(false);
             setAlertDialog(alert);
         } else {
             console.error('Failed to create the item:', data);
+            setIsLoading(false);
             alert(data.message);
         }
     }
@@ -339,7 +396,7 @@ const NewItemForm = () => {
                                 <input
                                     id="description"
                                     name="description"
-                                    value={description}
+                                    value={description || ''}
                                     onChange={(e) => setDescription(e.target.value)}
                                     maxLength={191} // The maximum length of a MySQL VARCHAR is 255 characters, but it will become 191 when using the default setting of prisma migrate
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -537,4 +594,4 @@ const NewItemForm = () => {
     );
 }
 
-export default NewItemForm;
+export default EditItemForm;

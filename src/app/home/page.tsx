@@ -119,7 +119,7 @@ const Home = async () => {
 
     return (
         <>
-            <MainLayout>
+            <MainLayout showSearchBar={false}>
                 <HomeComponent salt={salt} />
             </MainLayout>
         </>

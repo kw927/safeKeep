@@ -1,14 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import MainLayout from '@/components/main-layout';
 import ContentHeader from '@/components/content-header';
 import { getServerSession } from 'next-auth/next';
-import { notFound } from 'next/navigation';
-import ItemView from '@/components/item-view';
-import fs from 'fs';
-import { EncryptedFile, ItemProps } from '@/types/Item';
 import { getUserByEmail, getUserItemById } from '@/services/databaseService';
+import { notFound } from 'next/navigation';
 import { getFilesFromStorage } from '@/services/cryptoService';
+import EditItemForm from '@/components/edit-item-form';
 
 const getItem = async (itemId: string) => {
     // Get the authenticated session to determine if the user is logged in
@@ -45,7 +43,7 @@ const getItem = async (itemId: string) => {
     }
 }
 
-const Item = async ({ params }: { params: { itemId: string } }) => {
+const EditItem = async ({ params }: { params: { itemId: string } }) => {
     // Get the item from the database
     const item = await getItem(params.itemId);
 
@@ -72,17 +70,17 @@ const Item = async ({ params }: { params: { itemId: string } }) => {
     // Prepare the props to pass to the ItemView component
     const itemProps = { item: itemWithFiles };
 
-    const headerButton = `edit-item-${item.item_id}`
+    console.log(itemProps)
 
     return (
         <>
             <MainLayout showSearchBar={false}>
-                <ContentHeader title={item.name} button={headerButton} />
-
-                <ItemView {...itemProps} />
+                <ContentHeader title="Edit Item" />
+                <EditItemForm item={itemProps.item} />
+                
             </MainLayout>
         </>
     );
 };
 
-export default Item;
+export default EditItem

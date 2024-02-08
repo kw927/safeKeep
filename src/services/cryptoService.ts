@@ -139,3 +139,17 @@ const replaceFilename = (originalString: string, filename: string): string => {
     // Replace the matched filename with the new filename
     return originalString.replace(regex, `${filename}`);
 }
+
+export const getFilesFromStorage = async (filePath: string) => {
+    // Check if the file exists
+    if (!fs.existsSync(filePath)) {
+        return null;
+    }
+
+    // Read the file from the storage
+    // Read the encrypted data from the encrypted file
+    const encryptedDataString = fs.readFileSync(filePath, 'utf8');
+    const encryptedData = JSON.parse(encryptedDataString);
+
+    return encryptedData;
+}

@@ -27,7 +27,8 @@ const HomeComponent = ({ salt }: HomeComponentProps) => {
 
                 if (masterPassword) {
                     // route the all items page
-                    router.push('/item');
+                    // use window.location.href to force a reload of the items
+                    window.location.href = '/item';
                 } else {
                     setIsLoading(false);
                 }

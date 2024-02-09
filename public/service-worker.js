@@ -5,5 +5,7 @@ self.addEventListener('message', event => {
         masterPassword = event.data.password;
     } else if (event.data.action === 'getPassword') {
         event.ports[0].postMessage({ password: masterPassword });
+    } else if (event.data.action === 'removePassword') {
+        masterPassword = null;
     }
 });

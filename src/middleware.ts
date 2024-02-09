@@ -4,7 +4,7 @@ export default withAuth({
     callbacks: {
         authorized: async ({ req, token }) => {
             // Exclude the following paths
-            const publicPaths = ['/login', '/signup', '/api', '/images'];
+            const publicPaths = ['/', '/login', '/signup', '/api', '/images'];
             const path = req.nextUrl.pathname;
 
             // Allow access if the path is public

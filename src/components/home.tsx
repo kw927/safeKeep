@@ -24,6 +24,8 @@ const HomeComponent = ({ salt }: HomeComponentProps) => {
         const checkMasterPassword = async () => {
             if (salt) {
                 const masterPassword = await getMasterPasswordFromServiceWorker();
+                console.log('Master password from service worker:');
+                console.log(masterPassword);
 
                 if (masterPassword) {
                     // route the all items page

@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, ChangeEvent, useState } from 'react'
 import {
     Bars3Icon,
     BellIcon
@@ -9,16 +9,30 @@ import {
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { Dialog, Transition, Menu } from '@headlessui/react'
 import { TopNavProps } from '@/types/TopNav'
-
+import { useSearch } from '@/context/SearchProvider'
+import { useSession, signOut } from 'next-auth/react'
+import { removeMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils'
 
 const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
 const userNavigation = [
     { name: 'Your profile', href: '#' },
-    { name: 'Sign out', href: '#' },
+    { name: 'Sign out' },
 ]
 
 const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavProps) => {
+    const { data: session, status } = useSession()
+    const { searchQuery, setSearchQuery } = useSearch();
+
+    const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const handleSignOut = async () => {
+        await removeMasterPasswordFromServiceWorker();
+        signOut();
+    }
+
     return (
         <>
             {/* Top nav and content */}
@@ -51,6 +65,8 @@ const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavPro
                                         placeholder="Search..."
                                         type="search"
                                         name="search"
+                                        value={searchQuery}
+                                        onChange={handleSearchChange}
                                     />
                                 </>
                             )}
@@ -76,7 +92,7 @@ const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavPro
                                     </span>
                                     <span className="hidden lg:flex lg:items-center">
                                         <span className="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
-                                            Replace with the username
+                                            {status === "authenticated" ? `${session?.user?.firstName} ${session?.user?.lastName}` : "Guest"}
                                         </span>
                                         <ChevronDownIcon className="ml-2 h-5 w-5 text-gray-400" aria-hidden="true" />
                                     </span>
@@ -94,15 +110,28 @@ const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavPro
                                         {userNavigation.map((item) => (
                                             <Menu.Item key={item.name}>
                                                 {({ active }) => (
-                                                    <a
-                                                        href={item.href}
-                                                        className={classNames(
-                                                            active ? 'bg-gray-50' : '',
-                                                            'block px-3 py-1 text-sm leading-6 text-gray-900'
-                                                        )}
-                                                    >
-                                                        {item.name}
-                                                    </a>
+                                                    item.name !== 'Sign out' ? (
+                                                        <a
+                                                            href={item.href}
+                                                            className={classNames(
+                                                                active ? 'bg-gray-50' : '',
+                                                                'block px-3 py-1 text-sm leading-6 text-gray-900'
+                                                            )}
+                                                        >
+                                                            {item.name}
+                                                        </a>
+                                                    ) : (
+                                                        // Button for sign out
+                                                        <button
+                                                            onClick={handleSignOut}
+                                                            className={classNames(
+                                                                active ? 'bg-gray-50' : '',
+                                                                'block w-full text-left px-3 py-1 text-sm leading-6 text-gray-900'
+                                                            )}
+                                                        >
+                                                            {item.name}
+                                                        </button>
+                                                    )
                                                 )}
                                             </Menu.Item>
                                         ))}

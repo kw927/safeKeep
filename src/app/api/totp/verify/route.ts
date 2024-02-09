@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { authenticator } from 'otplib';
-import { decryptText } from '../../../../services/cryptoService';
+import { decryptText } from '@/services/cryptoServiceClient';
 
 const prisma = new PrismaClient();
 

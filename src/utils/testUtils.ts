@@ -2,9 +2,14 @@ import { TestUser } from '@/types/User';
 import { TestItem } from '@/types/Item';
 import { PrismaClient } from '@prisma/client';
 import { saveItem } from '@/services/databaseService';
+import fs from 'fs';
+import path from 'path';
 
 // This should be replaced with the actual test user's ID after creation
 const testUserId = 1;
+
+// Directory for test files
+export const testFilesDirectory = path.join(__dirname, 'testFiles');
 
 // A static test user
 export const testUser: TestUser = {

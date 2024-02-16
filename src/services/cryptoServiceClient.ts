@@ -243,13 +243,18 @@ export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: s
  * @returns {boolean} True if the signature is valid, false if not
  */
 export const verifySignature = (publicKeyHex: string, challenge: string, signatureHex: string) => {
-    const ec = new EC('secp256k1');
-    
-    const keyPair = ec.keyFromPublic(publicKeyHex, 'hex');
+    try {
+        const ec = new EC('secp256k1');
 
-    // Hash the challenge
-    const hashedChallenge = CryptoJS.SHA256(challenge).toString(CryptoJS.enc.Hex);
+        const keyPair = ec.keyFromPublic(publicKeyHex, 'hex');
 
-    // Verify the signature
-    return keyPair.verify(hashedChallenge, signatureHex);
+        // Hash the challenge
+        const hashedChallenge = CryptoJS.SHA256(challenge).toString(CryptoJS.enc.Hex);
+
+        // Verify the signature
+        return keyPair.verify(hashedChallenge, signatureHex);
+    } catch (error) {
+        // Return false for any errors and invalid inputs
+        return false;
+    }
 };

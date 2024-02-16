@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { authenticator } from 'otplib';
 import { decryptText } from '@/services/cryptoServiceClient';
+import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
@@ -21,28 +21,15 @@ const Verify = async (req: NextRequest, res: NextResponse) => {
     // Get the TOTP code from the request body
     const { totpCode } = await req.json();
 
-    // Check if the user is authenticated
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
+    const user = await getUserFromSession();
+
+    if (!user) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if the TOTP code is submitted
     if (!totpCode) {
         return NextResponse.json({ message: 'TOTP code is required' }, { status: 400 });
-    }
-
-    // Get the TOTP secret from the database
-    const user = await prisma.user.findUnique({
-        where: {
-            email: session.user.email
-        }
-    });
-
-    // Check if the user exists
-    if (!user) {
-        return NextResponse.json({ message: 'User not found' }, { status: 401 });
     }
 
     // Check if the TOTP secret exists
@@ -63,14 +50,14 @@ const Verify = async (req: NextRequest, res: NextResponse) => {
     // The TOTP code is valid, so enable TOTP for the user
     await prisma.user.update({
         where: {
-            email: session.user.email
+            email: user.email
         },
         data: {
             totp_enabled: true
         }
     });
 
-    return NextResponse.json({ message: 'success' }, { status: 200 });
+    return NextResponse.json({ message: 'success', userId: user.user_id }, { status: 200 });
 };
 
 export { Verify as POST }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from "next-auth/react"
 import { useRouter } from 'next/navigation';
-import { User } from '../../types/User';
+import { User } from '@/types/User';
 import LoginForm from '@/components/login-form';
 import TotpVerifyForm from '@/components/totp-verify-form';
 
@@ -21,7 +21,7 @@ const Login = () => {
     // State to store the login form data
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
+
     const [currentStep, setCurrentStep] = useState(LoginStep.DisplayLoginForm);
 
     // Get the authenticated session
@@ -44,7 +44,7 @@ const Login = () => {
                 router.push('/totp-setup');
             }
         }
-    }, [status]);    
+    }, [status]);
 
     return (
         <>

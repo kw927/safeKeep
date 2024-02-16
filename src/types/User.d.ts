@@ -7,5 +7,13 @@ export interface User {
 
 export interface LoginUserResponse {
     message: string;
+    userId: number;
     totpEnabled?: boolean;
+}
+
+export interface TestUser {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password_hash: string;
 }

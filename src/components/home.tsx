@@ -7,6 +7,9 @@ import EnterMasterPassword from './enter-master-password';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import { useRouter } from 'next/navigation';
 import LoadingModal from './loading-modal';
+import { useSession } from 'next-auth/react';
+import { User } from '@/types/User';
+import { useSideMenu } from '@/context/UserProvider';
 
 /**
 * The home component
@@ -16,8 +19,21 @@ const HomeComponent = ({ salt }: HomeComponentProps) => {
     // State to set the overlay visibility
     const [isPasswordSet, setIsPasswordSet] = useState(salt === null);
     const [isLoading, setIsLoading] = useState(true);
+    const { menuData, updateMenuData } = useSideMenu();
     
+    // Get the authenticated session
+    const { data: session, status } = useSession();
+
+    // The router object for redirecting the user to different pages
     const router = useRouter();
+
+    // useEffect hook to detmine which page to redirect to according to the user's authentication status
+    useEffect(() => {
+        if (status === 'authenticated' && session?.user) {
+            const user = session.user as User;
+            updateMenuData();
+        }
+    }, [status]);
 
     // Check if the master password is entered if the salt is not null
     useEffect(() => {

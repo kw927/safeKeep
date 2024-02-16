@@ -17,8 +17,14 @@ const Login = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
+    // Parse the request body and validate
+    const body = await req.json();
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the email and password from the request body
-    const { email, password } = await req.json();
+    const { email, password } = body;
 
     // Check if the user is authenticated
     const session = await getServerSession();
@@ -51,7 +57,7 @@ const Login = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Email or password incorrect' }, { status: 401 });
     }
 
-    return NextResponse.json({ message: 'success', totpEnabled: user.totp_enabled }, { status: 200 });
+    return NextResponse.json({ message: 'success', totpEnabled: user.totp_enabled, userId: user.user_id }, { status: 200 });
 };
 
 export { Login as POST }

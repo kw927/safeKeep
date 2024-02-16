@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { getSaltAndPublicKey } from '@/services/cryptoServiceClient';
-import { verifySignature } from '@/services/cryptoService';
+import { verifySignature } from '@/services/cryptoServiceClient';
+import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
@@ -15,22 +15,10 @@ const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
-    // Check if the user is authenticated
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if the public key has been set
-    const user = await prisma.user.findUnique({
-        where: {
-            email: session.user.email
-        }
-    });
+    const user = await getUserFromSession();
 
     if (!user) {
-        return NextResponse.json({ message: 'User not found' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     if (!user.public_key) {

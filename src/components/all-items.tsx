@@ -14,7 +14,7 @@ const AllItems = ({ items }: AllItemsProps) => {
     const [filteredItems, setFilteredItems] = useState<ListItem[]>([]);
 
     const navigateToItem = (itemId: number) => {
-        router.push(`./item/${itemId}`);
+        router.push(`/item/${itemId}`);
     };
 
     /**
@@ -35,14 +35,11 @@ const AllItems = ({ items }: AllItemsProps) => {
                         <div
                             className="flex w-full hover:border-blue-500 border border-gray-200 rounded-md cursor-pointer"
                             onClick={() => navigateToItem(item.id)}
-                            aria-role="button"
                             tabIndex={0}
                         >
                             <div
-                                className={classNames(
-                                    item.color,
-                                    'flex w-16 flex-shrink-0 items-center justify-center rounded-l-md text-sm font-medium text-white'
-                                )}
+                                style={{ backgroundColor: item.color, color: '#ffffff' }}
+                                className="flex w-16 flex-shrink-0 items-center justify-center rounded-l-md text-sm font-medium"
                             >
                                 {item.initials}
                             </div>

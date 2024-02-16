@@ -253,9 +253,13 @@ const NewItemForm = () => {
             }
         }));
 
+        // Declare the folder to be used in the request body
+        // Because updating the selectedFolder state is asynchronous, and making the folder object inside the request body will not have the updated state
+        let folder = selectedFolder;
+
         // Update the parent folder id if the selected folder is the new folder
         if (selectedFolder.id === -1) {
-            setSelectedFolder({ ...selectedFolder, parent_folder_id: selectedParentFolder.id });
+            folder = { ...selectedFolder, parent_folder_id: selectedParentFolder.id };
         }
 
         // Construct the request body
@@ -264,7 +268,7 @@ const NewItemForm = () => {
             description,
             data: encryptedSensitiveData,
             files: encryptedFiles,
-            folder: selectedFolder,
+            folder: folder,
             tags
         };
 
@@ -282,6 +286,8 @@ const NewItemForm = () => {
         const data = await res.json();
 
         if (res.ok) {
+            setIsLoading(false);
+
             const alert: AlertDialogState = {
                 show: true,
                 type: 'success',
@@ -300,6 +306,7 @@ const NewItemForm = () => {
             setAlertDialog(alert);
         } else {
             console.error('Failed to create the item:', data);
+            setIsLoading(false);
             alert(data.message);
         }
     }
@@ -362,7 +369,6 @@ const NewItemForm = () => {
                                     onChange={(e) => setSensitiveData(e.target.value)}
                                     maxLength={5000}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    defaultValue={''}
                                 />
                             </div>
                         </div>

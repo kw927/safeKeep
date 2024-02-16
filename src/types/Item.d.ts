@@ -54,3 +54,16 @@ export interface ItemProps {
         files: EncryptedFile[];
     }
 }
+
+export interface TestItem {
+    name: string;
+    description: string;
+    data: string;
+    user_id: number;
+    folder: {
+        id: number;
+        name: string;
+        parent_folder_id: number;
+    };
+    tags: string[];
+}

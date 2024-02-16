@@ -44,6 +44,7 @@ const getFolders = async (): Promise<FolderHierarchy> => {
 
 const EditItemForm = ({ item }: ItemProps) => {
     const rootFolder: ComboboxFolder = { id: 0, name: 'Root Folder', parent_folder_id: 0 };
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState('Decrypting Data...');
     const [title, setTitle] = useState(item.name);
@@ -145,11 +146,12 @@ const EditItemForm = ({ item }: ItemProps) => {
     }, []);
 
     useEffect(() => {
-        if (item.folder?.folder_id ?? 0 > 0) {
+        if (isInitialLoad && (item.folder?.folder_id ?? 0) > 0) {
             // Find the folder in the folders list
             const folder = folders.find(folder => folder.id === item.folder?.folder_id);
             if (folder) {
                 setSelectedFolder(folder);
+                setIsInitialLoad(false);
             }
         };
     }, [folders]);
@@ -224,6 +226,9 @@ const EditItemForm = ({ item }: ItemProps) => {
         // Add the new folder to the folders list
         // Use id -1 to indicate that this is a new folder
         const newFolder = { id: -1, name: newFolderName, parent_folder_id: 0 };
+        // if (selectedParentFolder.id > 0) {
+        //     newFolder.parent_folder_id = selectedParentFolder.id;
+        // }
         setFolders([...folders, newFolder]);
 
         // Select the new folder
@@ -306,9 +311,13 @@ const EditItemForm = ({ item }: ItemProps) => {
             }
         }));
 
+        // Declare the folder to be used in the request body
+        // Because updating the selectedFolder state is asynchronous, and making the folder object inside the request body will not have the updated state
+        let folder = selectedFolder;
+
         // Update the parent folder id if the selected folder is the new folder
         if (selectedFolder.id === -1) {
-            setSelectedFolder({ ...selectedFolder, parent_folder_id: selectedParentFolder.id });
+            folder = { ...selectedFolder, parent_folder_id: selectedParentFolder.id };
         }
 
         // Construct the request body
@@ -318,9 +327,11 @@ const EditItemForm = ({ item }: ItemProps) => {
             description,
             data: encryptedSensitiveData,
             files: encryptedFiles,
-            folder: selectedFolder,
+            folder: folder,
             tags
         };
+
+        console.log(requestBody);
 
         setLoadingMessage('Saving Data...');
 
@@ -419,7 +430,6 @@ const EditItemForm = ({ item }: ItemProps) => {
                                     onChange={(e) => setSensitiveData(e.target.value)}
                                     maxLength={5000}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    defaultValue={''}
                                 />
                             </div>
                         </div>

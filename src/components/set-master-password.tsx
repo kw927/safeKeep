@@ -3,7 +3,7 @@
 import React, { FormEvent, Fragment, useState } from 'react';
 import CustomAlert from './alert';
 import { AlertState } from '@/types/Alert';
-import { generateKey, convertWordArrayToBase64, convertBase64ToWordArray } from '@/services/cryptoUtil';
+import { generateKey, convertWordArrayToBase64, convertBase64ToWordArray } from '@/services/cryptoUtils';
 import { generatePublicKey, validatePassword, getSaltAndPublicKey } from '@/services/cryptoServiceClient';
 import { setMasterPasswordInServiceWorker, getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import { useRouter } from 'next/navigation';

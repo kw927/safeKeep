@@ -1,4 +1,5 @@
-import { Fragment } from 'react'
+'use client'
+import { Fragment, useEffect, useState } from 'react'
 import {
     ChartBarSquareIcon,
     Cog6ToothIcon,
@@ -7,9 +8,14 @@ import {
     ServerIcon,
     SignalIcon,
     XMarkIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { SidebarProps } from '@/types/Sidebar'
+import { SideMenuFolder } from '@/types/Sidebar'
+import { useSideMenu } from '@/context/UserProvider';
+import { useRouter } from 'next/navigation';
 
 const navigation = [
     { name: 'All Items', href: '/item', icon: FolderIcon, current: true },
@@ -19,15 +25,32 @@ const navigation = [
     { name: 'Item 4', href: '#', icon: ChartBarSquareIcon, current: false },
     { name: 'Item 5', href: '#', icon: Cog6ToothIcon, current: false },
 ]
-const teams = [
-    { id: 1, name: 'Subitem 1', href: '#', initial: 'P', current: false },
-    { id: 2, name: 'Subitem 2', href: '#', initial: 'P', current: false },
-    { id: 3, name: 'Subitem 3', href: '#', initial: 'T', current: false },
-]
 
 const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
 const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+    const { menuData, updateMenuData } = useSideMenu();
+    const [openSubFolders, setOpenSubFolders] = useState<number[]>([]);
+
+    const router = useRouter();
+
+    // Function to be called when a folder is clicked
+    const handleFolderClick = (folderId: number) => {
+        router.push(`/folder/${folderId}`);
+    };
+
+    const toggleSubFolders = (folderId: number) => {
+        const isOpen = openSubFolders.includes(folderId);
+        setOpenSubFolders(isOpen ? openSubFolders.filter(id => id !== folderId) : [...openSubFolders, folderId]);
+    };
+
+    // useEffect to Fetch Initial Side Menu Data on Component Mount
+    // This effect calls `updateMenuData` to asynchronously fetch and update the side menu data
+    // when the component first mounts. 
+    useEffect(() => {
+        updateMenuData().catch(console.error);
+    }, []);
+
     return (
         <>
             {/* Sidebar menu for desktop (lg) */}
@@ -63,36 +86,54 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                     ))}
                                 </ul>
                             </li>
-                            <li>
-                                <div className="text-xs font-semibold leading-6 text-gray-400">Subitems</div>
-                                <ul role="list" className="-mx-2 mt-2 space-y-1">
-                                    {teams.map((team) => (
-                                        <li key={team.name}>
-                                            <a
-                                                href={team.href}
-                                                className={classNames(
-                                                    team.current
-                                                        ? 'bg-gray-50 text-indigo-600'
-                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                )}
-                                            >
-                                                <span
-                                                    className={classNames(
-                                                        team.current
-                                                            ? 'text-indigo-600 border-indigo-600'
-                                                            : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
+                            { /* Folders */}
+                            {menuData && menuData.folders && (
+                                <li>
+                                    <div className="text-xs font-semibold leading-6 text-gray-400">Folders</div>
+                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
+                                        {menuData.folders.map((folder) => (
+                                            <li key={folder.folderId}>
+                                                <div className="flex items-center justify-between">
+                                                    <button
+                                                        onClick={() => handleFolderClick(folder.folderId)}
+                                                        className={classNames(
+                                                            false ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                        )}
+                                                    >
+                                                        <FolderIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                                                        <span className="truncate">{folder.name}</span>
+                                                    </button>
+                                                    {folder.subFolders.length > 0 && (
+                                                        <button
+                                                            onClick={() => toggleSubFolders(folder.folderId)}
+                                                            className="p-1"
+                                                        >
+                                                            {openSubFolders.includes(folder.folderId) ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronRightIcon className="h-5 w-5" />}
+                                                        </button>
                                                     )}
-                                                >
-                                                    {team.initial}
-                                                </span>
-                                                <span className="truncate">{team.name}</span>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </li>
+                                                </div>
+                                                {openSubFolders.includes(folder.folderId) && (
+                                                    <ul className="mt-2 ml-4 space-y-1">
+                                                        {folder.subFolders.map((subFolder) => (
+                                                            <li key={subFolder.folderId} className="truncate text-sm leading-6 font-semibold text-gray-700 hover:text-indigo-600">
+                                                                <button
+                                                                    onClick={() => handleFolderClick(subFolder.folderId)}
+                                                                    className="flex items-center gap-x-2"
+                                                                >
+                                                                    <FolderIcon className="inline-block h-4 w-4 shrink-0" aria-hidden="true" />
+                                                                    {subFolder.name}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                            )}
+
                             <li className="mt-auto">
                                 <a
                                     href="#"
@@ -189,36 +230,53 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                                     ))}
                                                 </ul>
                                             </li>
-                                            <li>
-                                                <div className="text-xs font-semibold leading-6 text-gray-400">Subitems</div>
-                                                <ul role="list" className="-mx-2 mt-2 space-y-1">
-                                                    {teams.map((team) => (
-                                                        <li key={team.name}>
-                                                            <a
-                                                                href={team.href}
-                                                                className={classNames(
-                                                                    team.current
-                                                                        ? 'bg-gray-50 text-indigo-600'
-                                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                                )}
-                                                            >
-                                                                <span
-                                                                    className={classNames(
-                                                                        team.current
-                                                                            ? 'text-indigo-600 border-indigo-600'
-                                                                            : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                                                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
-                                                                    )}
+                                            { /* Folders */}
+                            {menuData && menuData.folders && (
+                                <li>
+                                    <div className="text-xs font-semibold leading-6 text-gray-400">Folders</div>
+                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
+                                        {menuData.folders.map((folder) => (
+                                            <li key={folder.folderId}>
+                                                <div className="flex items-center justify-between">
+                                                    <button
+                                                        onClick={() => handleFolderClick(folder.folderId)}
+                                                        className={classNames(
+                                                            false ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                        )}
+                                                    >
+                                                        <FolderIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                                                        <span className="truncate">{folder.name}</span>
+                                                    </button>
+                                                    {folder.subFolders.length > 0 && (
+                                                        <button
+                                                            onClick={() => toggleSubFolders(folder.folderId)}
+                                                            className="p-1"
+                                                        >
+                                                            {openSubFolders.includes(folder.folderId) ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronRightIcon className="h-5 w-5" />}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {openSubFolders.includes(folder.folderId) && (
+                                                    <ul className="mt-2 ml-4 space-y-1">
+                                                        {folder.subFolders.map((subFolder) => (
+                                                            <li key={subFolder.folderId} className="truncate text-sm leading-6 font-semibold text-gray-700 hover:text-indigo-600">
+                                                                <button
+                                                                    onClick={() => handleFolderClick(subFolder.folderId)}
+                                                                    className="flex items-center gap-x-2"
                                                                 >
-                                                                    {team.initial}
-                                                                </span>
-                                                                <span className="truncate">{team.name}</span>
-                                                            </a>
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                                    <FolderIcon className="inline-block h-4 w-4 shrink-0" aria-hidden="true" />
+                                                                    {subFolder.name}
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
                                             </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                            )}
                                             <li className="mt-auto">
                                                 <a
                                                     href="#"

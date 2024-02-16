@@ -5,6 +5,7 @@ import HomeComponent from '@/components/home';
 import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { getSaltAndPublicKey } from '../../services/cryptoServiceClient';
+import { UserProvider } from '@/context/UserProvider';
 
 // declare the prisma client
 const prisma = new PrismaClient();
@@ -120,7 +121,9 @@ const Home = async () => {
     return (
         <>
             <MainLayout showSearchBar={false}>
-                <HomeComponent salt={salt} />
+                <UserProvider>
+                    <HomeComponent salt={salt} />
+                </UserProvider>
             </MainLayout>
         </>
     );

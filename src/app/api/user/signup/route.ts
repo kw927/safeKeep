@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
+import { validatePassword, validateEmail } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
 /**
  * The signup API for POST requests
- * @param req 
+ * @param req
  * @returns 
  */
 const Signup = async (req: NextRequest) => {
@@ -17,12 +18,34 @@ const Signup = async (req: NextRequest) => {
     }
 
     try {
+        // Parse the request body and validate
+        const body = await req.json();
+        if (!body) {
+            return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+        }
+
         // Get the user data from the request body
-        const { firstName, lastName, email, password } = await req.json();
+        const { firstName, lastName, email, password } = body;
 
         // Check if the required fields are submitted
         if (!firstName || !lastName || !email || !password) {
-            return NextResponse.json({ message: 'Missing required fields' }), { status: 400 };
+            return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+        }
+
+        // Check if the first name and last name are not empty and within the length limit
+        if (firstName.length < 1 || firstName.length > 50 || lastName.length < 1 || lastName.length > 50) {
+            return NextResponse.json({ message: 'First name and last name must be between 1 and 50 characters' }, { status: 400 });
+        }
+
+        // Check if the email is valid
+        if (!validateEmail(email)) {
+            return NextResponse.json({ message: 'Invalid email' }, { status: 400 });
+        }
+
+        // Check if the password meets the password policy
+        const validatePasswordResult = validatePassword(password);
+        if (!validatePasswordResult.isValid) {
+            return NextResponse.json({ message: validatePasswordResult.message }, { status: 400 });
         }
 
         // Check if user already exists

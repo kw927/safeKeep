@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
+import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
@@ -10,10 +10,9 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
-    // Check if the user is authenticated
-    const session = await getServerSession();
-    
-    if (!session?.user?.email) {
+    const user = await getUserFromSession();
+
+    if (!user) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -30,16 +29,6 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
     }
 
     // Check if the key has been set
-    const user = await prisma.user.findUnique({
-        where: {
-            email: session.user.email
-        }
-    });
-
-    if (!user) {
-        return NextResponse.json({ message: 'User not found' }, { status: 401 });
-    }
-
     if (user.public_key) {
         return NextResponse.json({ message: 'Public key has been set' }, { status: 401 });
     }
@@ -48,7 +37,7 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
     try {
         await prisma.user.update({
             where: {
-                email: session.user.email
+                email: user.email
             },
             data: {
                 public_key: publicKey

@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { authenticator } from 'otplib';
-import { decryptText } from '../../../../services/cryptoServiceClient';
+import { decryptText } from '@/services/cryptoServiceClient';
 
 // Define a type for the credentials
 interface Credentials {

@@ -1,12 +1,21 @@
 import CryptoJS from 'crypto-js';
 import { ec as EC } from 'elliptic';
-import { generateKey, generateSalt, convertBase64ToWordArray, KEY_SIZE, SALT_SIZE, ITERATIONS } from './cryptoUtil';
+import { generateKey, generateSalt, KEY_SIZE, SALT_SIZE, ITERATIONS } from './cryptoUtils';
 import { EncryptedFile, DecryptedFile } from '@/types/Crypto';
 
+/**
+ * Function to generate a public key from a private key
+ * @param privateKey {string} The private key to use
+ * @returns {string} The generated public key with the salt concatenated
+ */
 export const generatePublicKey = (privateKey: string) => {
+    // Create an instance of the elliptic curve algorithm
     const ec = new EC('secp256k1');
 
+    // Generate a random salt
     const salt = generateSalt(SALT_SIZE);
+
+    // Derive the key from the private key and the salt
     const key = generateKey(privateKey, salt, KEY_SIZE, ITERATIONS);
 
     // Convert the key to a hex string
@@ -20,13 +29,21 @@ export const generatePublicKey = (privateKey: string) => {
     return salt.toString() + publicKey;
 }
 
+/**
+ * Function to sign a challenge with a private key
+ * @param challenge {string} The challenge to sign
+ * @param privateKey {string} The private key to use
+ * @param salt {string} The salt to use
+ * @returns {string} The signature in DER format encoded as hex
+ */
 export const signChallenge = (challenge: string, privateKey: string, salt: string) => {
+    // Create an instance of the elliptic curve algorithm
     const ec = new EC('secp256k1');
 
     // Convert the salt to a WordArray
     const saltHex = CryptoJS.enc.Hex.parse(salt);
 
-    // Generate the key
+    // Derive the key from the private key and the salt
     const key = generateKey(privateKey, saltHex, KEY_SIZE, ITERATIONS);
 
     // Convert the key to a hex string
@@ -45,6 +62,11 @@ export const signChallenge = (challenge: string, privateKey: string, salt: strin
     return signature.toDER('hex');
 }
 
+/**
+ * Function to verify a signature with a public key
+ * @param publicKeyFromDatabase {string} The public key concatenated with the salt from the database
+ * @returns {salt: string, publicKey: string} The extracted salt and public key
+ */
 export const getSaltAndPublicKey = (publicKeyFromDatabase: string) => {
     // Extract the salt from the public key
     const salt = publicKeyFromDatabase.substring(0, 32);
@@ -58,6 +80,12 @@ export const getSaltAndPublicKey = (publicKeyFromDatabase: string) => {
     }
 }
 
+/**
+ * Function to verify a password strength and match
+ * @param password {string} The password to validate
+ * @param confirmPassword {string} The password to confirm
+ * @returns {isValid: boolean, errorMessages: string[]}
+ */
 export const validatePassword = (password: string, confirmPassword: string) => {
     const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/;
     const hasUppercaseLetter = /[A-Z]/;
@@ -92,15 +120,15 @@ export const validatePassword = (password: string, confirmPassword: string) => {
 
 /**
  * Function to encrypt plain text such as TOTP secret
- * @param text 
- * @param encryptionKey 
- * @returns 
+ * @param text {string} The text to encrypt
+ * @param encryptionKey {string} The key to use for encryption
+ * @returns {string} The encrypted text
  */
 export const encryptText = (text: string, encryptionKey: string) => {
     // Generate a random salt
     const salt = generateSalt(SALT_SIZE);
 
-    // Generate the key
+    // Derive the key from the encryption key and the salt
     const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
 
     // Encrypt the text
@@ -110,26 +138,11 @@ export const encryptText = (text: string, encryptionKey: string) => {
     return salt.toString() + encryptedText.toString();
 }
 
-// export const encryptTextWithDerivedKey = (text: string, derivedKey: string) => {
-//     // Generate a random salt
-//     const salt = generateSalt(SALT_SIZE);
-
-//     // const key = convertBase64ToWordArray(derivedKey);
-//     // Generate the key
-//     const key = generateKey(derivedKey, salt, KEY_SIZE, ITERATIONS);
-
-//     // Encrypt the text
-//     const encryptedText = CryptoJS.AES.encrypt(text, key.toString());
-
-//     // Concatenate the salt and the encrypted Text
-//     return salt.toString() + encryptedText.toString();
-// }
-
 /**
  * Function to decrypt encrypted text such as TOTP secret
- * @param text 
- * @param encryptionKey 
- * @returns 
+ * @param text {string} The encrypted text to decrypt
+ * @param encryptionKey {string} The key to use for decryption
+ * @returns {string} The decrypted text
  */
 export const decryptText = (text: string, encryptionKey: string) => {
     // Extract the salt from the text
@@ -138,9 +151,8 @@ export const decryptText = (text: string, encryptionKey: string) => {
     // Extract the encrypted TOTP secret from the text
     const encryptedText = text.substring(32);
 
-    // Generate the key
+    // Derive the key from the encryption key and the salt
     const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
-
 
     // Decrypt the text
     const decryptedText = CryptoJS.AES.decrypt(encryptedText, key.toString());
@@ -149,28 +161,11 @@ export const decryptText = (text: string, encryptionKey: string) => {
     return decryptedText.toString(CryptoJS.enc.Utf8);
 }
 
-// export const decryptTextWithDerivedKey = (text: string, derivedKey: string) => {
-//     // Extract the salt from the text
-//     const salt = CryptoJS.enc.Hex.parse(text.substring(0, 32));
-
-//     // Extract the encrypted TOTP secret from the text
-//     const encryptedText = text.substring(32);
-
-//     const key = convertBase64ToWordArray(derivedKey);
-
-//     // Decrypt the text
-//     const decryptedText = CryptoJS.AES.decrypt(encryptedText, key.toString());
-
-//     // Return the decrypted Text
-//     return decryptedText.toString(CryptoJS.enc.Utf8);
-// }
-
 /**
  * Function to encrypt a file
- * @param file 
- * @param encryptionKey 
- * @param filePath 
- * @returns 
+ * @param file {File} The file to encrypt
+ * @param encryptionKey {string} The key to use for encryption}
+ * @returns {Promise<EncryptedFile | null>} The encrypted file data, or null if an error occurred
  */
 export const encryptFile = async (file: File, encryptionKey: string): Promise<EncryptedFile | null> => {
     try {
@@ -184,7 +179,7 @@ export const encryptFile = async (file: File, encryptionKey: string): Promise<En
         // Generate a random salt
         const salt = generateSalt(SALT_SIZE);
 
-        // Generate the key
+        // Derive the key from the encryption key and the salt
         const key = generateKey(encryptionKey, salt, KEY_SIZE, ITERATIONS);
 
         // Encrypt the file data
@@ -205,6 +200,12 @@ export const encryptFile = async (file: File, encryptionKey: string): Promise<En
     }
 }
 
+/**
+ * Function to decrypt a file
+ * @param encryptedData {EncryptedFile} The encrypted file data to decrypt
+ * @param encryptionKey {string} The key to use for decryption  
+ * @returns {Promise<DecryptedFile | null>} The decrypted file data, or null if an error occurred
+ */
 export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: string): Promise<DecryptedFile | null> => {
     try {
         // Extract the ciphertext, salt, filename and filetype from the encrypted data
@@ -218,9 +219,10 @@ export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: s
         // Decrypt the file data
         const decryptedWordArray = CryptoJS.AES.decrypt(ciphertext, key.toString());
 
-        // If the file is not a text file, handle as binary
+        // Convert the decrypted WordArray to a Buffer
         const decryptedBuffer = Buffer.from(decryptedWordArray.toString(CryptoJS.enc.Base64), 'base64');
 
+        // Create an object to store the decrypted file data and the metadata
         const decryptedFile: DecryptedFile = {
             decryptedBuffer: decryptedBuffer,
             filename: filename,
@@ -232,3 +234,22 @@ export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: s
         return null;
     }
 }
+
+/**
+ * Function to verify a signature
+ * @param publicKeyHex {string} The public key in hex format
+ * @param challenge {string} The challenge to verify, in hex format
+ * @param signatureHex {string} The signature to verify, in hex format
+ * @returns {boolean} True if the signature is valid, false if not
+ */
+export const verifySignature = (publicKeyHex: string, challenge: string, signatureHex: string) => {
+    const ec = new EC('secp256k1');
+    
+    const keyPair = ec.keyFromPublic(publicKeyHex, 'hex');
+
+    // Hash the challenge
+    const hashedChallenge = CryptoJS.SHA256(challenge).toString(CryptoJS.enc.Hex);
+
+    // Verify the signature
+    return keyPair.verify(hashedChallenge, signatureHex);
+};

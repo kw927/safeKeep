@@ -4,7 +4,7 @@
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { validatePassword, validateEmail } from '@/utils/userAccountUtils';
 
 const SignUpFrom = () => {
     // State to store the sign-up form data
@@ -25,9 +25,19 @@ const SignUpFrom = () => {
         // prevent the default form submission behavior
         event.preventDefault();
 
-        // TODO: to check if the first name and last name are valid
+        // Check if the first name and last name are not empty and within the length limit
+        if (firstName.length < 1 || firstName.length > 50 || lastName.length < 1 || lastName.length > 50) {
+            // Handle first name and last name error
+            alert('First name and last name must be between 1 and 50 characters');
+            return;
+        }
 
-        // TODO: to check if the email is valid
+        // Check if the email is valid
+        if (!validateEmail(email)) {
+            // Handle invalid email error
+            alert('Invalid email');
+            return;
+        }
 
         // Check if the password and confirm password match
         if (password !== confirmPassword) {
@@ -36,7 +46,14 @@ const SignUpFrom = () => {
             return;
         }
 
-        // TODO: To check if the password meets the password policy
+        // Check if the password meets the password policy
+        const validatePasswordResult = validatePassword(password);
+
+        if (!validatePasswordResult.isValid) {
+            // Handle invalid password error
+            alert(validatePasswordResult.message);
+            return;
+        }
 
         try {
             // Call the sign-up API to sign-up the user

@@ -4,7 +4,7 @@ import React, { FormEvent, Fragment, useState } from 'react';
 import CustomAlert from './alert';
 import { AlertState } from '@/types/Alert';
 import { signChallenge, validatePassword } from '@/services/cryptoServiceClient';
-import { generateKey, convertWordArrayToBase64, convertBase64ToWordArray } from '@/services/cryptoUtil';
+import { generateKey, convertWordArrayToBase64, convertBase64ToWordArray } from '@/services/cryptoUtils';
 import { EnterMasterPasswordProps } from '../types/Home';
 import { setMasterPasswordInServiceWorker, getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import { useRouter } from 'next/navigation';

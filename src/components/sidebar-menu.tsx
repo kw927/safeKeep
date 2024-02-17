@@ -1,38 +1,37 @@
 'use client'
 import { Fragment, useEffect, useState } from 'react'
 import {
-    ChartBarSquareIcon,
     Cog6ToothIcon,
     FolderIcon,
-    GlobeAltIcon,
-    ServerIcon,
-    SignalIcon,
     XMarkIcon,
     ChevronDownIcon,
     ChevronRightIcon,
+    CurrencyPoundIcon
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { SidebarProps } from '@/types/Sidebar'
-import { SideMenuFolder } from '@/types/Sidebar'
+import { usePathname } from 'next/navigation'
 import { useSideMenu } from '@/context/UserProvider';
 import { useRouter } from 'next/navigation';
 
 const navigation = [
-    { name: 'All Items', href: '/item', icon: FolderIcon, current: true },
-    { name: 'Item 1', href: '#', icon: ServerIcon, current: false },
-    { name: 'Item 2', href: '#', icon: SignalIcon, current: false },
-    { name: 'Item 3', href: '#', icon: GlobeAltIcon, current: false },
-    { name: 'Item 4', href: '#', icon: ChartBarSquareIcon, current: false },
-    { name: 'Item 5', href: '#', icon: Cog6ToothIcon, current: false },
+    { name: 'All Items', href: '/item', icon: FolderIcon, current: false },
+    { name: 'Donation', href: '/donation', icon: CurrencyPoundIcon, current: false }
 ]
 
 const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
 
 const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+    const pathname = usePathname()
+    const router = useRouter();
+
     const { menuData, updateMenuData } = useSideMenu();
     const [openSubFolders, setOpenSubFolders] = useState<number[]>([]);
 
-    const router = useRouter();
+    // Check if the pathname matches the items in navigation and update the current state
+    navigation.forEach((item) => {
+        item.current = item.href === pathname;
+    });
 
     // Function to be called when a folder is clicked
     const handleFolderClick = (folderId: number) => {
@@ -231,52 +230,52 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                                 </ul>
                                             </li>
                                             { /* Folders */}
-                            {menuData && menuData.folders && (
-                                <li>
-                                    <div className="text-xs font-semibold leading-6 text-gray-400">Folders</div>
-                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
-                                        {menuData.folders.map((folder) => (
-                                            <li key={folder.folderId}>
-                                                <div className="flex items-center justify-between">
-                                                    <button
-                                                        onClick={() => handleFolderClick(folder.folderId)}
-                                                        className={classNames(
-                                                            false ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                                        )}
-                                                    >
-                                                        <FolderIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                                                        <span className="truncate">{folder.name}</span>
-                                                    </button>
-                                                    {folder.subFolders.length > 0 && (
-                                                        <button
-                                                            onClick={() => toggleSubFolders(folder.folderId)}
-                                                            className="p-1"
-                                                        >
-                                                            {openSubFolders.includes(folder.folderId) ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronRightIcon className="h-5 w-5" />}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {openSubFolders.includes(folder.folderId) && (
-                                                    <ul className="mt-2 ml-4 space-y-1">
-                                                        {folder.subFolders.map((subFolder) => (
-                                                            <li key={subFolder.folderId} className="truncate text-sm leading-6 font-semibold text-gray-700 hover:text-indigo-600">
-                                                                <button
-                                                                    onClick={() => handleFolderClick(subFolder.folderId)}
-                                                                    className="flex items-center gap-x-2"
-                                                                >
-                                                                    <FolderIcon className="inline-block h-4 w-4 shrink-0" aria-hidden="true" />
-                                                                    {subFolder.name}
-                                                                </button>
+                                            {menuData && menuData.folders && (
+                                                <li>
+                                                    <div className="text-xs font-semibold leading-6 text-gray-400">Folders</div>
+                                                    <ul role="list" className="-mx-2 mt-2 space-y-1">
+                                                        {menuData.folders.map((folder) => (
+                                                            <li key={folder.folderId}>
+                                                                <div className="flex items-center justify-between">
+                                                                    <button
+                                                                        onClick={() => handleFolderClick(folder.folderId)}
+                                                                        className={classNames(
+                                                                            false ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                                                        )}
+                                                                    >
+                                                                        <FolderIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                                                                        <span className="truncate">{folder.name}</span>
+                                                                    </button>
+                                                                    {folder.subFolders.length > 0 && (
+                                                                        <button
+                                                                            onClick={() => toggleSubFolders(folder.folderId)}
+                                                                            className="p-1"
+                                                                        >
+                                                                            {openSubFolders.includes(folder.folderId) ? <ChevronDownIcon className="h-5 w-5" /> : <ChevronRightIcon className="h-5 w-5" />}
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                                {openSubFolders.includes(folder.folderId) && (
+                                                                    <ul className="mt-2 ml-4 space-y-1">
+                                                                        {folder.subFolders.map((subFolder) => (
+                                                                            <li key={subFolder.folderId} className="truncate text-sm leading-6 font-semibold text-gray-700 hover:text-indigo-600">
+                                                                                <button
+                                                                                    onClick={() => handleFolderClick(subFolder.folderId)}
+                                                                                    className="flex items-center gap-x-2"
+                                                                                >
+                                                                                    <FolderIcon className="inline-block h-4 w-4 shrink-0" aria-hidden="true" />
+                                                                                    {subFolder.name}
+                                                                                </button>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                )}
                                                             </li>
                                                         ))}
                                                     </ul>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
-                            )}
+                                                </li>
+                                            )}
                                             <li className="mt-auto">
                                                 <a
                                                     href="#"

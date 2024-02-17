@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { DocumentIcon, TrashIcon, PlusIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid';
-import { Combobox, Dialog } from '@headlessui/react'
+import { DocumentIcon, TrashIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid';
+import { Combobox } from '@headlessui/react'
 import { ComboboxFolder } from '@/types/Item';
 import NewItemFolder from './new-item-folder';
 import { FolderHierarchy } from '@/types/Folder';
@@ -12,8 +12,7 @@ import { useRouter } from 'next/navigation';
 import AlertDialog from './alert-dialog';
 import { AlertDialogState } from '@/types/Alert';
 import LoadingModal from './loading-modal';
-
-const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
+import { classNames } from '@/utils/pageUtils';
 
 const getFolders = async (): Promise<FolderHierarchy> => {
     // Get the folders from API

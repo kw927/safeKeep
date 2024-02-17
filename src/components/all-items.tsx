@@ -1,12 +1,10 @@
 'use client'
-import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import { AllItemsProps } from '@/types/Item';
 import { useRouter } from 'next/navigation';
 import { useSearch } from '@/context/SearchProvider';
 import { useEffect, useState } from 'react';
 import { ListItem } from '@/types/Item';
-
-const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
+import { classNames } from '@/utils/pageUtils';
 
 const AllItems = ({ items }: AllItemsProps) => {
     const { searchQuery } = useSearch();

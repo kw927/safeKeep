@@ -1,19 +1,15 @@
 'use client'
 
-import { Fragment, ChangeEvent, useState } from 'react'
-import {
-    Bars3Icon,
-    BellIcon
-} from '@heroicons/react/24/outline'
+import { Fragment, ChangeEvent } from 'react'
+import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline'
 
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
-import { Dialog, Transition, Menu } from '@headlessui/react'
+import { Transition, Menu } from '@headlessui/react'
 import { TopNavProps } from '@/types/TopNav'
 import { useSearch } from '@/context/SearchProvider'
 import { useSession, signOut } from 'next-auth/react'
 import { removeMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils'
-
-const classNames = (...classes: any[]) => classes.filter(Boolean).join(' ');
+import { classNames } from '@/utils/pageUtils';
 
 const userNavigation = [
     { name: 'Your profile', href: '#' },

@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { redirect } from 'next/navigation';
 import MainLayout from '@/components/main-layout';
 import ContentHeader from '@/components/content-header';
 import { getEncryptedWeb3Wallet } from '@/utils/web3Utils';
-import CryptoComponent from '@/components/crypto';
+import ReceiveCryptoComponent from '@/components/crypto-receive';
 
-const Web3 = async () => {
+const ReceiveCrypto = async () => {
     // Get the Web3 wallet data
     const encryptedWeb3Wallets = await getEncryptedWeb3Wallet();
 
@@ -14,17 +15,15 @@ const Web3 = async () => {
         redirect('/web3');
     }
 
-    // Render the crypto page
+    // Render the send crypto page
     return (
         <MainLayout showSearchBar={false}>
-            <ContentHeader title='Web3 Wallet' />
-            <div className='relative flex justify-center p-10'>
-                <CryptoComponent
-                    encryptedWallet={encryptedWeb3Wallets[0].encrypted_wallet}
-                />
+            <ContentHeader title="Web3 Wallet" />
+            <div className="relative flex justify-center p-10">
+                <ReceiveCryptoComponent encryptedWallet={encryptedWeb3Wallets[0].encrypted_wallet} />
             </div>
         </MainLayout>
-    );
+    )
 };
 
-export default Web3;
+export default ReceiveCrypto;

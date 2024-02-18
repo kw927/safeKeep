@@ -1,12 +1,13 @@
 'use client'
-import { Fragment, useEffect, useState } from 'react'
+import { ForwardRefExoticComponent, Fragment, RefAttributes, SVGProps, useEffect, useState } from 'react'
 import {
     Cog6ToothIcon,
     FolderIcon,
     XMarkIcon,
     ChevronDownIcon,
     ChevronRightIcon,
-    CurrencyPoundIcon
+    CurrencyPoundIcon,
+    GlobeAltIcon
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { SidebarProps } from '@/types/Sidebar'
@@ -14,8 +15,36 @@ import { usePathname } from 'next/navigation'
 import { useSideMenu } from '@/context/UserProvider';
 import { useRouter } from 'next/navigation';
 
+interface BasicNavItem {
+    name: string;
+    href: string;
+    icon: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & {
+        title?: string | undefined;
+        titleId?: string | undefined;
+    } & RefAttributes<SVGSVGElement>>;
+    current: boolean;
+}
+
+interface NavItemWithSubmenus extends BasicNavItem {
+    submenus: BasicNavItem[];
+}
+
+// Combined type for items that may or may not have submenus
+type NavItem = BasicNavItem | NavItemWithSubmenus;
+
+
 const navigation = [
     { name: 'All Items', href: '/item', icon: FolderIcon, current: false },
+    {
+        name: 'Web3 Wallet',
+        href: '/web3',
+        icon: GlobeAltIcon,
+        current: false,
+        submenus: [
+            { name: 'Cryptocurrency', href: '/web3/crypto', current: false },
+            { name: 'NFT', href: '/web3/nft', current: false },
+        ],
+    },
     { name: 'Donation', href: '/donation', icon: CurrencyPoundIcon, current: false }
 ]
 
@@ -27,6 +56,7 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
     const { menuData, updateMenuData } = useSideMenu();
     const [openSubFolders, setOpenSubFolders] = useState<number[]>([]);
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
     // Check if the pathname matches the items in navigation and update the current state
     navigation.forEach((item) => {
@@ -36,6 +66,26 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     // Function to be called when a folder is clicked
     const handleFolderClick = (folderId: number) => {
         router.push(`/folder/${folderId}`);
+    };
+
+    const handleMenuClick = (item: NavItem) => {
+
+        // Check if item has submenus
+        const hasSubmenus = "submenus" in item && item.submenus.length > 0;
+
+        if (hasSubmenus) {
+            setOpenSubmenu(openSubmenu === item.name ? null : item.name);
+        } else {
+            router.push(item.href);
+        }
+
+        // Check if the current path is within the Web3 Wallet routes
+        if (item.name === 'Web3 Wallet' && hasSubmenus) {
+            const isWithinWeb3Routes = item.submenus.some(submenu => pathname.includes(submenu.href)) || pathname === item.href;
+            if (!isWithinWeb3Routes) {
+                router.push('/web3');
+            }
+        }
     };
 
     const toggleSubFolders = (folderId: number) => {
@@ -49,6 +99,19 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     useEffect(() => {
         updateMenuData().catch(console.error);
     }, []);
+
+    useEffect(() => {
+        // Check if the current pathname matches any of the submenu routes
+        const matchingItem = navigation.find(item =>
+            "submenus" in item && item.submenus?.some(submenu => pathname.startsWith(submenu.href))
+        );
+
+        // If there's a match, update the openSubmenu state to keep the submenu open
+        if (matchingItem) {
+            setOpenSubmenu(matchingItem.name);
+        }
+    }, [pathname]); // Dependency array includes pathname to react on its changes
+
 
     return (
         <>
@@ -71,16 +134,39 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                         <li key={item.name}>
                                             <a
                                                 href={item.href}
+                                                onClick={(e) => {
+                                                    // Check for 'submenus' using a type guard
+                                                    if ("submenus" in item) {
+                                                        e.preventDefault(); // Prevent default link behavior
+                                                        handleMenuClick(item);
+                                                    }
+                                                }}
                                                 className={classNames(
-                                                    item.current
-                                                        ? 'bg-gray-50 text-indigo-600'
-                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                    item.current ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                                 )}
                                             >
                                                 <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
                                                 {item.name}
                                             </a>
+                                            {/* Check for 'submenus' again before rendering them */}
+                                            {"submenus" in item && item.name === openSubmenu && (
+                                                <ul className="ml-4 mt-2">
+                                                    {item.submenus?.map((submenu) => (
+                                                        <li key={submenu.name}>
+                                                            <a
+                                                                href={submenu.href}
+                                                                className={classNames(
+                                                                    pathname === submenu.href ? 'text-indigo-600 bg-gray-50' : 'text-gray-700 hover:text-indigo-600',
+                                                                    'block p-2 text-sm leading-6 font-semibold hover:bg-gray-50'
+                                                                )}
+                                                            >
+                                                                {submenu.name}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -209,22 +295,39 @@ const SidebarMenu = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                                         <li key={item.name}>
                                                             <a
                                                                 href={item.href}
+                                                                onClick={(e) => {
+                                                                    // Check for 'submenus' using a type guard
+                                                                    if ("submenus" in item) {
+                                                                        e.preventDefault(); // Prevent default link behavior
+                                                                        handleMenuClick(item);
+                                                                    }
+                                                                }}
                                                                 className={classNames(
-                                                                    item.current
-                                                                        ? 'bg-gray-50 text-indigo-600'
-                                                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                                                                    item.current ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
                                                                     'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                                                 )}
                                                             >
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
-                                                                        'h-6 w-6 shrink-0'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
+                                                                <item.icon className="h-6 w-6 shrink-0" aria-hidden="true" />
                                                                 {item.name}
                                                             </a>
+                                                            {/* Check for 'submenus' again before rendering them */}
+                                                            {"submenus" in item && item.name === openSubmenu && (
+                                                                <ul className="ml-4 mt-2">
+                                                                    {item.submenus?.map((submenu) => (
+                                                                        <li key={submenu.name}>
+                                                                            <a
+                                                                                href={submenu.href}
+                                                                                className={classNames(
+                                                                                    pathname === submenu.href ? 'text-indigo-600 bg-gray-50' : 'text-gray-700 hover:text-indigo-600',
+                                                                                    'block p-2 text-sm leading-6 font-semibold hover:bg-gray-50'
+                                                                                )}
+                                                                            >
+                                                                                {submenu.name}
+                                                                            </a>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            )}
                                                         </li>
                                                     ))}
                                                 </ul>

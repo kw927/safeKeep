@@ -30,8 +30,15 @@ const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Invalid public key' }, { status: 400 });
     }
 
+    // Parse the request body and validate
+    const body = await req.json();
+
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the signture from the request body
-    const { signature } = await req.json();
+    const { signature } = await body;
 
     // Get the challenge from the database
     try {

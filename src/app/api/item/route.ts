@@ -26,8 +26,16 @@ const NewItem = async (req: NextRequest, res: NextResponse) => {
     if (req.method !== 'POST') {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
+
+    // Parse the request body and validate
+    const body = await req.json();
+
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the data from the request body
-    const { name, description, data, files, folder, tags } = await req.json();
+    const { name, description, data, files, folder, tags } = body;
 
     try {
         // Check if the user is authenticated
@@ -66,8 +74,15 @@ const EditItem = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
+    // Parse the request body and validate
+    const body = await req.json();
+
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the data from the request body
-    const { itemId, name, description, data, files, folder, tags } = await req.json();
+    const { itemId, name, description, data, files, folder, tags } = body;
 
     try {
         // Check if the user is authenticated

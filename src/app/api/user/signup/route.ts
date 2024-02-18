@@ -20,6 +20,7 @@ const Signup = async (req: NextRequest) => {
     try {
         // Parse the request body and validate
         const body = await req.json();
+        
         if (!body) {
             return NextResponse.json({ message: 'Bad request' }, { status: 400 });
         }

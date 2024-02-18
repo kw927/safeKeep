@@ -83,7 +83,7 @@ model File {
 model Web3Wallet {
   wallet_id        Int      @id @default(autoincrement())
   user_id          Int
-  encrypted_wallet String
+  encrypted_wallet String   @db.Text
   wallet_name      String
   created_at       DateTime
   updated_at       DateTime

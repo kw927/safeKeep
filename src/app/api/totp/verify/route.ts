@@ -18,8 +18,15 @@ const Verify = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
+    // Parse the request body and validate
+    const body = await req.json();
+
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the TOTP code from the request body
-    const { totpCode } = await req.json();
+    const { totpCode } = body;
 
     const user = await getUserFromSession();
 

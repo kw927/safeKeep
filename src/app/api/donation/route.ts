@@ -13,8 +13,15 @@ const NewPayment = async (req: NextRequest, res: NextResponse) => {
     if (req.method !== 'POST') {
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
+
+    // Parse the request body and validate
+    const body = await req.json();
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the data from the request body
-    const { amount, redirectUrl } = await req.json();
+    const { amount, redirectUrl } = body;
 
     try {
         // Check if the user is authenticated

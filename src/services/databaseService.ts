@@ -444,3 +444,20 @@ export const associateTags = async (tx: PrismaTransactionClient, tags: string[],
     // Await all the tag links creations
     await Promise.all(tagLinks);
 }
+
+/**
+ * Function to get user's wallets
+ * @param userId {number} The user id
+ */
+export const getUserWallets = async (userId: number) => {
+    try {
+        return await prisma.web3Wallet.findMany({
+            where: {
+                user_id: userId
+            }
+        });
+    } catch (error) {
+        console.error('Failed to get user wallets:', error);
+        return [];
+    }
+};

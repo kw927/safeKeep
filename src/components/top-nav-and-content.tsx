@@ -9,7 +9,7 @@ import { TopNavProps } from '@/types/TopNav'
 import { useSearch } from '@/context/SearchProvider'
 import { useSession, signOut } from 'next-auth/react'
 import { removeMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils'
-import { classNames } from '@/utils/pageUtils';
+import { classNames } from '@/utils/pageUtils'
 
 const userNavigation = [
     { name: 'Your profile', href: '#' },

@@ -16,8 +16,15 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    // Parse the request body and validate
+    const body = await req.json();
+
+    if (!body) {
+        return NextResponse.json({ message: 'Bad request' }, { status: 400 });
+    }
+
     // Get the public key from the request body
-    const { publicKey } = await req.json();
+    const { publicKey } = body;
 
     if (!publicKey) {
         return NextResponse.json({ message: 'Public key is required' }, { status: 400 });

@@ -24,3 +24,28 @@ export interface DisplayTransaction {
     valuePrefix: string;
     valueColor: string;
 }
+
+export interface DisplayNFT {
+    name: string;
+    description: string;
+    shortDescription: string;
+    image: string;
+    tokenId: string;
+    tokenAddress: string;
+    owner: string;
+    contractType: string;
+    symbol: string;
+    tokenUri: string;
+    attributes: NFTAttributes[];
+}
+
+export interface NFTAttributes {
+    name: string;
+    value: string;
+}
+
+export interface NFTProps {
+    chainId: string;
+    tokenAddress: string;
+    tokenId: string;
+}

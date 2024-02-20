@@ -1,5 +1,8 @@
-// This loading modal is adapted from: 
-// https://tailwindcomponents.com/component/loading-modal
+/**
+ * This loading modal is adapted from:
+ * https://tailwindcomponents.com/component/loading-modal
+ */
+
 import React from 'react';
 
 const LoadingModal = ({ messaage = "Loading..."}) => {
@@ -7,17 +10,21 @@ const LoadingModal = ({ messaage = "Loading..."}) => {
         <div>
             <div className="fixed top-0 left-0 z-50 w-screen h-screen flex items-center justify-center" style={{background: "rgba(0, 0, 0, 0.3)"}}>
                 <div className="bg-white border py-2 px-5 rounded-lg flex items-center flex-col">
+                    {/* Loading dots animation */}
                     <div className="loader-dots block relative w-20 h-5 mt-2">
                         <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-indigo-700"></div>
                         <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-indigo-700"></div>
                         <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-indigo-700"></div>
                         <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-indigo-700"></div>
                     </div>
+
+                    {/* Loading message */}
                     <div className="text-gray-500 text-base font-medium mt-2 text-center">
                         {messaage}
                     </div>
                 </div>
             </div>
+
             { /* Use inline styling for simplicity */}
             <style jsx>{`
                 .loader-dots div {

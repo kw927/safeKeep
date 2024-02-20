@@ -1,8 +1,15 @@
-'use client'
+/**
+ * Donation form component
+ * This is a client component and all the code is executed on the client side.
+ */
+
+'use client';
 import React, { useState } from 'react';
 import { RadioGroup } from '@headlessui/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { classNames } from '@/utils/pageUtils';
+import AlertDialog from '@/components/common/alert-dialog';
+import { useAlertDialog } from '@/components/hook/use-alert-dialog';
 
 const DonationComponent = () => {
     // Fixed donation amounts
@@ -12,9 +19,12 @@ const DonationComponent = () => {
     const [selectedAmount, setSelectedAmount] = useState(fixedAmounts[0]);
     const [customAmount, setCustomAmount] = useState(0);
 
+    // State to manage the alert dialog
+    const { isDialogVisible, alertDialog, showDialog } = useAlertDialog();
+
     /**
      * Function to handle the selection of a fixed amount
-     * @param amount 
+     * @param amount
      */
     const handleSelectAmount = (amount: number) => {
         // Set the selected amount
@@ -41,7 +51,7 @@ const DonationComponent = () => {
     /**
      * Function to handle the form submission
      * @param e {React.FormEvent<HTMLFormElement>}
-    */
+     */
     const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         // Prevent the default form submission behaviour
         e.preventDefault();
@@ -51,19 +61,40 @@ const DonationComponent = () => {
 
         // The minimum amount is 1
         if (amount === 0) {
-            alert('Donation amount cannot be £0');
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Donation amount cannot be £0',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return;
         }
 
         // The maximum amount is 1000
         if (amount > 1000) {
-            alert('The maximum donation amount is £1000');
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'The maximum donation amount is £1000',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return;
         }
 
         // Check if the amount is valid (is an integer and greater than 0)
         if (!Number.isInteger(amount) || amount < 1) {
-            alert('Please enter a valid amount');
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Please enter a valid amount',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+            
             return;
         }
 
@@ -75,7 +106,7 @@ const DonationComponent = () => {
 
     /**
      * Function to create a new payment session
-     * @param amount 
+     * @param amount
      */
     const createPaymentSession = async (amount: number) => {
         // Call the API to create a new payment session
@@ -114,14 +145,16 @@ const DonationComponent = () => {
         } catch (error) {
             alert('Failed to create payment session');
         }
-    }
+    };
 
     return (
-        <div className="p-6 mx-auto bg-white rounded-xl shadow-md flex flex-col space-y-4 min-w-full">
+        <div className='p-6 mx-auto bg-white rounded-xl shadow-md flex flex-col space-y-4 min-w-full'>
+            {/* Donation form */}
             <form onSubmit={handleFormSubmit}>
-                <RadioGroup value={selectedAmount} onChange={handleSelectAmount} className="mt-4">
-                    <RadioGroup.Label className="sr-only">Choose a donation amount</RadioGroup.Label>
-                    <div className="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
+                <RadioGroup value={selectedAmount} onChange={handleSelectAmount} className='mt-4'>
+                    {/* Donation amount options */}
+                    <h2>Choose a donation amount</h2>
+                    <div className='grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4 pt-6'>
                         {fixedAmounts.map((amount) => (
                             <RadioGroup.Option
                                 key={amount}
@@ -135,7 +168,7 @@ const DonationComponent = () => {
                             >
                                 {({ active, checked }) => (
                                     <>
-                                        <RadioGroup.Label as="span">£{amount}</RadioGroup.Label>
+                                        <RadioGroup.Label as='span'>£{amount}</RadioGroup.Label>
 
                                         <span
                                             className={classNames(
@@ -143,9 +176,8 @@ const DonationComponent = () => {
                                                 checked ? 'border-indigo-500' : 'border-transparent',
                                                 'pointer-events-none absolute -inset-px rounded-md'
                                             )}
-                                            aria-hidden="true"
+                                            aria-hidden='true'
                                         />
-
                                     </>
                                 )}
                             </RadioGroup.Option>
@@ -153,30 +185,39 @@ const DonationComponent = () => {
                     </div>
                 </RadioGroup>
 
-                <div className="flex flex-col mt-4">
-                    <label htmlFor="customAmount" className="text-sm font-medium text-gray-700">
+                {/* Custom amount input */}
+                <div className='flex flex-col mt-4'>
+                    <label htmlFor='customAmount' className='text-sm font-medium text-gray-700'>
                         Custom Amount
                     </label>
                     <input
-                        type="number"
-                        id="customAmount"
+                        type='number'
+                        id='customAmount'
                         value={customAmount}
                         onChange={handleCustomAmountChange}
-                        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Enter your donation amount"
-                        max="1000"
+                        className='mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                        placeholder='Enter your donation amount'
+                        max='1000' // Maximum amount is £1000
                     />
                 </div>
 
-                <div className="flex justify-center pt-6">
+                {/* Submit button */}
+                <div className='flex justify-center pt-6'>
                     <button
-                        type="submit"
-                        className="px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        type='submit'
+                        className='px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700'
                     >
                         Donate
                     </button>
                 </div>
             </form>
+
+            {/* Alert Dialog */}
+            <AlertDialog
+                open={isDialogVisible}
+                setOpen={(show) => showDialog(show)}
+                {...alertDialog}
+            />
         </div>
     );
 };

@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
 
 /**
  * The login API for POST requests
- * @param req {NextRequest}
- * @param res {NextResponse}
- * @returns 
+ * @param email {string} The email of the user
+ * @param password {string} The password of the user
+ * @returns
  */
 const Login = async (req: NextRequest, res: NextResponse) => {
     // Check if the request method is POST
@@ -28,7 +28,7 @@ const Login = async (req: NextRequest, res: NextResponse) => {
 
     // Check if the user is authenticated
     const session = await getServerSession();
-    
+
     if (session?.user?.email) {
         return NextResponse.json({ message: 'User has already logged in' }, { status: 401 });
     }
@@ -41,8 +41,8 @@ const Login = async (req: NextRequest, res: NextResponse) => {
     // Get the user from the database
     const user = await prisma.user.findUnique({
         where: {
-            email: email
-        }
+            email: email,
+        },
     });
 
     // Check if the user exists
@@ -60,4 +60,4 @@ const Login = async (req: NextRequest, res: NextResponse) => {
     return NextResponse.json({ message: 'success', totpEnabled: user.totp_enabled, userId: user.user_id }, { status: 200 });
 };
 
-export { Login as POST }
+export { Login as POST };

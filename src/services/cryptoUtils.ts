@@ -12,21 +12,26 @@ export const ITERATIONS = 60000;
 /**
  * Helper function to generate a key
  * @param encryptionKey {string} The key to use for encryption
- * @param salt {CryptoJS.lib.WordArray | string} The salt to use for encryption. If a string is passed, it will be converted to a WordArray 
+ * @param salt {CryptoJS.lib.WordArray | string} The salt to use for encryption. If a string is passed, it will be converted to a WordArray
  * @param keySize {number} The size of the key to generate, in bits. Default is KEY_SIZE
  * @param iterations {number} The number of iterations to use for the PBKDF2 algorithm. Default is ITERATIONS
  * @returns {CryptoJS.lib.WordArray} The generated key as a WordArray
  */
-export const generateKey = (encryptionKey: string, salt: CryptoJS.lib.WordArray | string, keySize: number = KEY_SIZE, iterations: number = ITERATIONS) => {
+export const generateKey = (
+    encryptionKey: string,
+    salt: CryptoJS.lib.WordArray | string,
+    keySize: number = KEY_SIZE,
+    iterations: number = ITERATIONS
+) => {
     if (typeof salt === 'string') {
         salt = CryptoJS.enc.Hex.parse(salt);
     }
 
     return CryptoJS.PBKDF2(encryptionKey, salt, {
         keySize: keySize,
-        iterations: iterations
+        iterations: iterations,
     });
-}
+};
 
 /**
  * Helper function to generate a random salt
@@ -35,7 +40,7 @@ export const generateKey = (encryptionKey: string, salt: CryptoJS.lib.WordArray 
  */
 export const generateSalt = (saltSize: number) => {
     return CryptoJS.lib.WordArray.random(saltSize);
-}
+};
 
 /**
  * Helper function to convert a WordArray to a Base64 string
@@ -44,7 +49,7 @@ export const generateSalt = (saltSize: number) => {
  */
 export const convertWordArrayToBase64 = (wordArray: CryptoJS.lib.WordArray) => {
     return CryptoJS.enc.Base64.stringify(wordArray);
-}
+};
 
 /**
  * Helper function to convert a Base64 string to a WordArray
@@ -53,4 +58,4 @@ export const convertWordArrayToBase64 = (wordArray: CryptoJS.lib.WordArray) => {
  */
 export const convertBase64ToWordArray = (base64Str: string) => {
     return CryptoJS.enc.Base64.parse(base64Str);
-}
+};

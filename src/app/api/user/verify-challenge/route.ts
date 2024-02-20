@@ -6,9 +6,10 @@ import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
-// TODO: Add rate limiting
-// TODO: Block user after n failed attempts
-
+/**
+ * API endpoint to verify the signature of the challenge
+ * @param signature {string} The signature to verify
+ */
 const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
     if (req.method !== 'POST') {
@@ -44,11 +45,11 @@ const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
     try {
         const challenge = await prisma.challenge.findFirst({
             where: {
-                user_id: user.user_id
+                user_id: user.user_id,
             },
             orderBy: {
-                expires: 'desc'
-            }
+                expires: 'desc',
+            },
         });
 
         if (!challenge) {
@@ -75,6 +76,6 @@ const VerifyChallenge = async (req: NextRequest, res: NextResponse) => {
         console.error('Error verifying signature:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
-}
+};
 
-export { VerifyChallenge as POST }
+export { VerifyChallenge as POST };

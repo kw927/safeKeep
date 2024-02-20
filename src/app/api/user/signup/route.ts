@@ -7,20 +7,22 @@ const prisma = new PrismaClient();
 
 /**
  * The signup API for POST requests
- * @param req
- * @returns 
+ * @param firstName {string} The first name of the user
+ * @param lastName {string} The last name of the user
+ * @param email {string} The email of the user
+ * @param password {string} The password of the user
  */
 const Signup = async (req: NextRequest) => {
     // Check if the request method is POST
     if (req.method !== 'POST') {
-        console.log(req.method)
+        console.log(req.method);
         return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
     }
 
     try {
         // Parse the request body and validate
         const body = await req.json();
-        
+
         if (!body) {
             return NextResponse.json({ message: 'Bad request' }, { status: 400 });
         }
@@ -51,14 +53,14 @@ const Signup = async (req: NextRequest) => {
 
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
-            where: { email }
+            where: { email },
         });
 
         if (existingUser) {
             return NextResponse.json({ message: 'User already exists' }, { status: 409 });
         }
 
-        // Hash the password
+        // Hash the password with a random salt
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create the user in the database
@@ -82,4 +84,4 @@ const Signup = async (req: NextRequest) => {
     }
 };
 
-export { Signup as POST }
+export { Signup as POST };

@@ -56,7 +56,7 @@ export const getMasterPasswordFromServiceWorker = async (): Promise<string> => {
  * Function to remove the master password from the service worker (use when the user logs out)
  */
 export const removeMasterPasswordFromServiceWorker = async () => {
-    // Wait for the service worker to be ready  
+    // Wait for the service worker to be ready
     const swRegistration = await navigator.serviceWorker.ready;
     // Remove the master password from the service worker
     if (swRegistration.active) {

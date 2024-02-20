@@ -52,7 +52,7 @@ export interface ItemProps {
             };
         }[];
         files: EncryptedFile[];
-    }
+    };
 }
 
 export interface TestItem {

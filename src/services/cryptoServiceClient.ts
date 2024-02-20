@@ -27,7 +27,7 @@ export const generatePublicKey = (privateKey: string) => {
 
     // Concatenate the salt and the public key
     return salt.toString() + publicKey;
-}
+};
 
 /**
  * Function to sign a challenge with a private key
@@ -60,7 +60,7 @@ export const signChallenge = (challenge: string, privateKey: string, salt: strin
 
     // Return the signature in DER format encoded as hex
     return signature.toDER('hex');
-}
+};
 
 /**
  * Function to verify a signature with a public key
@@ -76,9 +76,9 @@ export const getSaltAndPublicKey = (publicKeyFromDatabase: string) => {
 
     return {
         salt: salt,
-        publicKey: publicKey
-    }
-}
+        publicKey: publicKey,
+    };
+};
 
 /**
  * Function to verify a password strength and match
@@ -94,27 +94,27 @@ export const validatePassword = (password: string, confirmPassword: string) => {
     let errorMessages = [];
 
     if (password.length < 12) {
-        errorMessages.push("Password must be at least 12 characters long.");
+        errorMessages.push('Password must be at least 12 characters long.');
     }
     if (!hasSymbol.test(password)) {
-        errorMessages.push("Password must contain at least one symbol.");
+        errorMessages.push('Password must contain at least one symbol.');
     }
     if (!hasUppercaseLetter.test(password)) {
-        errorMessages.push("Password must contain at least one uppercase letter.");
+        errorMessages.push('Password must contain at least one uppercase letter.');
     }
     if (!hasLowercaseLetter.test(password)) {
-        errorMessages.push("Password must contain at least one lowercase letter.");
+        errorMessages.push('Password must contain at least one lowercase letter.');
     }
     if (!hasNumber.test(password)) {
-        errorMessages.push("Password must contain at least one number.");
+        errorMessages.push('Password must contain at least one number.');
     }
     if (password !== confirmPassword) {
-        errorMessages.push("Passwords do not match.");
+        errorMessages.push('Passwords do not match.');
     }
 
     return {
         isValid: errorMessages.length === 0,
-        errorMessages: errorMessages
+        errorMessages: errorMessages,
     };
 };
 
@@ -136,7 +136,7 @@ export const encryptText = (text: string, encryptionKey: string) => {
 
     // Concatenate the salt and the encrypted Text
     return salt.toString() + encryptedText.toString();
-}
+};
 
 /**
  * Function to decrypt encrypted text such as TOTP secret
@@ -159,7 +159,7 @@ export const decryptText = (text: string, encryptionKey: string) => {
 
     // Return the decrypted Text
     return decryptedText.toString(CryptoJS.enc.Utf8);
-}
+};
 
 /**
  * Function to encrypt a file
@@ -190,7 +190,7 @@ export const encryptFile = async (file: File, encryptionKey: string): Promise<En
             ciphertext: encryptedFile.toString(),
             salt: salt.toString(),
             filename: file.name,
-            filetype: file.type
+            filetype: file.type,
         };
 
         return encryptedData;
@@ -198,12 +198,12 @@ export const encryptFile = async (file: File, encryptionKey: string): Promise<En
         console.error('File processing error:', error);
         return null;
     }
-}
+};
 
 /**
  * Function to decrypt a file
  * @param encryptedData {EncryptedFile} The encrypted file data to decrypt
- * @param encryptionKey {string} The key to use for decryption  
+ * @param encryptionKey {string} The key to use for decryption
  * @returns {Promise<DecryptedFile | null>} The decrypted file data, or null if an error occurred
  */
 export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: string): Promise<DecryptedFile | null> => {
@@ -226,14 +226,14 @@ export const decryptFile = async (encryptedData: EncryptedFile, encryptionKey: s
         const decryptedFile: DecryptedFile = {
             decryptedBuffer: decryptedBuffer,
             filename: filename,
-            filetype: encryptedData.filetype
+            filetype: encryptedData.filetype,
         };
 
         return decryptedFile;
     } catch (error) {
         return null;
     }
-}
+};
 
 /**
  * Function to verify a signature

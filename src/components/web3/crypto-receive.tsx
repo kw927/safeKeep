@@ -1,3 +1,7 @@
+/**
+ * Component to receive crypto on a specific chain
+ * This is a client component and all the code is executed on the client side.
+ */
 'use client';
 import React, { useEffect, useState } from 'react';
 import { EncryptedWalletProps } from '@/types/Crypto';
@@ -5,9 +9,11 @@ import { Wallet } from 'ethers';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import Image from 'next/image';
-import LoadingModal from './loading-modal';
+import LoadingModal from '@/components/common/loading-modal';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { QRCodeSVG } from 'qrcode.react';
+import AlertDialog from '@/components/common/alert-dialog';
+import { useAlertDialog } from '@/components/hook/use-alert-dialog';
 
 const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
     const router = useRouter();
@@ -32,9 +38,10 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
 
     // State to store the loading status
     const [isLoading, setIsLoading] = useState(true);
-    const [loadingMessage, setLoadingMessage] = useState(
-        'Fetching wallet data...'
-    );
+    const [loadingMessage, setLoadingMessage] = useState('Fetching wallet data...');
+
+    // State to manage the alert dialog
+    const { isDialogVisible, alertDialog, showDialog } = useAlertDialog();
 
     /**
      * Function to get the master password from the service worker and decrypt the wallet
@@ -57,8 +64,7 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
      * If not, redirect to home page which will prompt the user to enter the master password
      */
     const getMasterPassword = async () => {
-        const masterPasswordFromServiceWorker =
-            await getMasterPasswordFromServiceWorker();
+        const masterPasswordFromServiceWorker = await getMasterPasswordFromServiceWorker();
         if (!masterPasswordFromServiceWorker) {
             // Redirect to home if no master password is set
             router.push('/');
@@ -93,10 +99,24 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
     const handleCopyToClipboard = () => {
         navigator.clipboard.writeText(walletAddress).then(
             () => {
-                alert('Wallet address copied to clipboard!');
+                // Show the success message
+                showDialog(true, {
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Wallet address copied to clipboard!',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
             },
             (error) => {
-                console.error('Could not copy text: ', error);
+                // Show the error message
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: `Could not copy text: ${error}`,
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
             }
         );
     };
@@ -117,7 +137,8 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
         // Decrypt the wallet to get the address
         const decryptWalletAndGetAddress = async () => {
             setIsLoading(true);
-            // Assuming decryptWallet is a function that returns the wallet object
+
+            // Decrypt the wallet
             const wallet = await decryptWallet(encryptedWallet);
 
             if (wallet?.address) {
@@ -127,6 +148,7 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
             setIsLoading(false);
         };
 
+        // Call the function to decrypt the wallet and get the address
         decryptWalletAndGetAddress();
     }, [encryptedWallet]);
 
@@ -138,20 +160,12 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                 <>
                     <div className='p-6 mx-auto bg-white rounded-xl shadow-md flex flex-col space-y-4 min-w-full items-center'>
                         <div className='text-center items-center'>
-                            {/** The selected chain icon and name */}
-                            <Image
-                                className='mx-auto h-36 w-auto mb-6'
-                                src={selectedChain.icon}
-                                alt={selectedChain.name}
-                                width={144}
-                                height={144}
-                            />
-                            <h1 className='text-3xl font-bold tracking-tight text-gray-900'>
-                                Receive token on {selectedChain.name}
-                            </h1>
+                            {/* The selected chain icon and name */}
+                            <Image className='mx-auto h-36 w-auto mb-6' src={selectedChain.icon} alt={selectedChain.name} width={144} height={144} />
+                            <h1 className='text-3xl font-bold tracking-tight text-gray-900'>Receive token on {selectedChain.name}</h1>
                         </div>
 
-                        {/** QR code for the wallet address */}
+                        {/* QR code for the wallet address */}
                         <QRCodeSVG
                             value={walletAddress}
                             size={256}
@@ -167,23 +181,16 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                             }}
                         />
 
-                        {/** The wallet address */}
+                        {/* The wallet address */}
                         <div className='mt-4'>
-                            <p className='text-lg text-center'>
-                                Your wallet address
-                            </p>
+                            <p className='text-lg text-center'>Your wallet address</p>
                             <div className='flex w-full mb-6 bg-white shadow-lg rounded-lg p-4'>
-                                <p className='text-lg text-center'>
-                                    {walletAddress}
-                                </p>
-                                <ClipboardDocumentIcon
-                                    className='ml-3 h-5 w-5 text-gray-500 cursor-pointer'
-                                    onClick={handleCopyToClipboard}
-                                />
+                                <p className='text-lg text-center'>{walletAddress}</p>
+                                <ClipboardDocumentIcon className='ml-3 h-5 w-5 text-gray-500 cursor-pointer' onClick={handleCopyToClipboard} />
                             </div>
                         </div>
 
-                        {/** Back button */}
+                        {/* Back button */}
                         <button
                             className='inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                             onClick={() => {
@@ -195,6 +202,9 @@ const ReceiveCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                     </div>
                 </>
             )}
+
+            {/* Alert Dialog */}
+            <AlertDialog open={isDialogVisible} setOpen={(show) => showDialog(show)} {...alertDialog} />
         </>
     );
 };

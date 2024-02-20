@@ -8,9 +8,7 @@ const prisma = new PrismaClient();
 
 /**
  * The API for verifying the TOTP code
- * @param req 
- * @param res 
- * @returns 
+ * @param totpCode {string} The TOTP code
  */
 const Verify = async (req: NextRequest, res: NextResponse) => {
     // Check if the request method is POST
@@ -57,14 +55,14 @@ const Verify = async (req: NextRequest, res: NextResponse) => {
     // The TOTP code is valid, so enable TOTP for the user
     await prisma.user.update({
         where: {
-            email: user.email
+            email: user.email,
         },
         data: {
-            totp_enabled: true
-        }
+            totp_enabled: true,
+        },
     });
 
     return NextResponse.json({ message: 'success', userId: user.user_id }, { status: 200 });
 };
 
-export { Verify as POST }
+export { Verify as POST };

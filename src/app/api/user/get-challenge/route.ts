@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
+/**
+ * API endpoint to get the challenge for verifying the master password
+ */
 const GetChallenge = async (req: NextRequest, res: NextResponse) => {
     // Only allow GET requests
     if (req.method !== 'GET') {
@@ -27,24 +29,24 @@ const GetChallenge = async (req: NextRequest, res: NextResponse) => {
         return NextResponse.json({ message: 'Invalid public key' }, { status: 400 });
     }
 
-    // Generate the challenge and save it to the database
+    // Generate a random challenge and save it to the database
     try {
         const challenge = uuidv4();
         await prisma.challenge.create({
             data: {
                 user_id: user.user_id,
                 challenge: challenge,
-                expires: new Date(Date.now() + 60000) // valid for 1 minutes
-            }
+                expires: new Date(Date.now() + 60000), // valid for 1 minutes
+            },
         });
 
         // Remove all expired challenges
         await prisma.challenge.deleteMany({
             where: {
                 expires: {
-                    lte: new Date()
-                }
-            }
+                    lte: new Date(),
+                },
+            },
         });
 
         return NextResponse.json({ message: 'Challenge generated', challenge: challenge }, { status: 200 });
@@ -52,6 +54,6 @@ const GetChallenge = async (req: NextRequest, res: NextResponse) => {
         console.error('Error generating challenge', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
-}
+};
 
-export { GetChallenge as GET }
+export { GetChallenge as GET };

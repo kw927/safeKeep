@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ValidationError } from '@/types/ValidationError'
+import { ValidationError } from '@/types/ValidationError';
 import { getUserFromSession } from '@/utils/userAccountUtils';
 import Stripe from 'stripe';
 
 /**
  * POST request to create a new Stripe payment session
- * @param req {NextRequest}
- * @param res {NextResponse}
+ * @param amount {number} The amount of the payment
+ * @param redirectUrl {string} The URL to redirect to after the payment is complete
  */
 const NewPayment = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
@@ -54,13 +54,13 @@ const NewPayment = async (req: NextRequest, res: NextResponse) => {
             return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
         }
     }
-}
+};
 
 /**
  * Function to create a new Stripe checkout session
- * @param amount 
- * @param redirectUrl 
- * @returns 
+ * @param amount
+ * @param redirectUrl
+ * @returns
  */
 const createCheckoutSession = async (amount: number, redirectUrl: string) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
@@ -76,7 +76,7 @@ const createCheckoutSession = async (amount: number, redirectUrl: string) => {
                 price_data: {
                     currency: 'gbp',
                     product_data: {
-                        name: `Donation Amount £${amount}`
+                        name: `Donation Amount £${amount}`,
                     },
                     unit_amount: amountInCents,
                 },
@@ -91,5 +91,4 @@ const createCheckoutSession = async (amount: number, redirectUrl: string) => {
     return session;
 };
 
-
-export { NewPayment as POST }
+export { NewPayment as POST };

@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import LoadingModal from '@/components/loading-modal';
+import LoadingModal from '@/components/common/loading-modal';
 
 const Home = () => {
     const { data: session } = useSession();
     const router = useRouter();
     const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
 
+    /**
+     * useEffect to register the service worker
+     */
     useEffect(() => {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
@@ -19,16 +22,15 @@ const Home = () => {
                 })
                 .catch(err => {
                     console.error('Service Worker Registration Failed', err);
-                    // Optionally set to true to proceed or handle the error differently
-                    //setServiceWorkerReady(true);
                 });
         } else {
             console.log('Service Worker not supported in this browser');
-            // Optionally set to true to proceed or handle the case differently
-            //setServiceWorkerReady(true);
         }
     }, []);
 
+    /**
+     * useEffect to redirect the user to the home page if the service worker is ready
+     */
     useEffect(() => {
         if (serviceWorkerReady) {
             // Using a slight delay to ensure state updates and other async operations have settled

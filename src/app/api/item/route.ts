@@ -1,25 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
 import { EncryptedFile } from '@/types/Crypto';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
-import fs from 'fs';
-import { ValidationError } from '@/types/ValidationError'
+import { ValidationError } from '@/types/ValidationError';
 import { getUserFromSession } from '@/utils/userAccountUtils';
 import { saveItem, updateItem } from '@/services/databaseService';
 
 const prisma = new PrismaClient();
 
 // The type definition for PrismaClient for transactions
-// Code adapted from: https://stackoverflow.com/questions/77209892/pass-prisma-transaction-into-a-function-in-typescript 
-type PrismaTransactionClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
+// Code adapted from: https://stackoverflow.com/questions/77209892/pass-prisma-transaction-into-a-function-in-typescript
+type PrismaTransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 
 /**
  * POST request to save a new item
- * @param req 
- * @param res 
- * @returns 
+ * @param name {string} The name of the item
+ * @param description {string} The description of the item
+ * @param data {string} The encrypted data of the item
+ * @param files {EncryptedFile[]} The encrypted files of the item
+ * @param folder {{ id: number; name: string; parent_folder_id: number }} The folder of the item
+ * @param tags {string[]} The tags of the item
  */
 const NewItem = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
@@ -60,13 +59,18 @@ const NewItem = async (req: NextRequest, res: NextResponse) => {
             return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
         }
     }
-}
+};
 
 /**
  * PUT and PATCH request to edit an item
- * @param req 
- * @param res 
- * @returns 
+ * @param itemId {number} The id of the item
+ * @param name {string} The name of the item
+ * @param description {string} The description of the item
+ * @param data {string} The encrypted data of the item
+ * @param files {EncryptedFile[]} The encrypted files of the item
+ * @param folder {{ id: number; name: string; parent_folder_id: number }} The folder of the item
+ * @param tags {string[]} The tags of the item
+ * @returns
  */
 const EditItem = async (req: NextRequest, res: NextResponse) => {
     // Only allow PUT and PATCH requests
@@ -100,25 +104,24 @@ const EditItem = async (req: NextRequest, res: NextResponse) => {
 
         // Update the item in the database
         const result = await updateItem(req.method, itemId, user.user_id, name, description, data, folder, files, tags);
-
     } catch (error) {
         if (error instanceof ValidationError) {
             return NextResponse.json({ message: error.message }, { status: error.statusCode });
         } else {
-            console.error('Error saving the item:', error);
+            console.error('Error updating the item:', error);
             return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
         }
     }
 
     return NextResponse.json({ message: 'Item saved updated' }, { status: 200 });
-}
+};
 
 /**
  * Function to check if the item exists
  * Exported for testing
- * @param itemId 
- * @param userId 
- * @returns 
+ * @param itemId {number} The item id
+ * @param userId {number} The user id
+ * @returns {Promise} The item from the database
  */
 const validateItem = async (itemId: number, userId: number) => {
     // Get the item from the database
@@ -126,8 +129,8 @@ const validateItem = async (itemId: number, userId: number) => {
         where: {
             item_id: itemId,
             user_id: userId,
-            is_deleted: false
-        }
+            is_deleted: false,
+        },
     });
 
     // Check if the item exists
@@ -136,19 +139,26 @@ const validateItem = async (itemId: number, userId: number) => {
     }
 
     return item;
-}
+};
 
 /**
  * Function to validate the user input
  * Exported for testing
- * @param name 
- * @param description 
- * @param data 
- * @param files 
- * @param folder 
- * @param tags 
+ * @param name {string} The name of the item
+ * @param description {string} The description of the item
+ * @param data {string} The data of the item
+ * @param files {EncryptedFile[]} The files of the item
+ * @param folder {{ id: number; name: string; parent_folder_id: number }} The folder of the item
+ * @param tags {string[]} The tags of the item
  */
-export const validateUserInput = async (name: string, description: string, data: string, files: EncryptedFile[], folder: { id: number, name: string, parent_folder_id: number }, tags: string[]) => {
+export const validateUserInput = async (
+    name: string,
+    description: string,
+    data: string,
+    files: EncryptedFile[],
+    folder: { id: number; name: string; parent_folder_id: number },
+    tags: string[]
+) => {
     // Check if the required fields are submitted
     if (!name) {
         throw new ValidationError('Name is required', 400);
@@ -168,8 +178,8 @@ export const validateUserInput = async (name: string, description: string, data:
         if (folder?.parent_folder_id > 0) {
             const parentFolder = await prisma.folder.findUnique({
                 where: {
-                    folder_id: folder.parent_folder_id
-                }
+                    folder_id: folder.parent_folder_id,
+                },
             });
 
             if (!parentFolder) {
@@ -207,8 +217,8 @@ export const validateUserInput = async (name: string, description: string, data:
             }
         }
     }
-}
+};
 
-export { NewItem as POST }
-export { EditItem as PUT }
-export { EditItem as PATCH }
+export { NewItem as POST };
+export { EditItem as PUT };
+export { EditItem as PATCH };

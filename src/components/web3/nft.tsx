@@ -1,11 +1,18 @@
+/**
+ * NFT Component
+ * This is a client component and all the code is executed on the client side.
+ */
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
-import LoadingModal from './loading-modal';
+import LoadingModal from '@/components/common/loading-modal';
 import { NFTAttributes, DisplayNFT } from '@/types/Crypto';
 import { useRouter } from 'next/navigation';
 import { NFTProps } from '@/types/Crypto';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import AlertDialog from '@/components/common/alert-dialog';
+import { useAlertDialog } from '@/components/hook/use-alert-dialog';
 
 const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
     const router = useRouter();
@@ -28,6 +35,9 @@ const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
     // State to store the loading status
     const [isLoading, setIsLoading] = useState(true);
 
+    // State to manage the alert dialog
+    const { isDialogVisible, alertDialog, showDialog } = useAlertDialog();
+
     /**
      * Function to get the selected chain from the URL
      */
@@ -48,13 +58,27 @@ const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
     const getNFT = async (chain: string) => {
         try {
             if (!tokenAddress || !tokenId) {
-                alert('Token address or token id is not defined');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Token address or token id is not defined',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
             // Call the API only if it is defined in environment variables
             if (!process.env.NEXT_PUBLIC_MORALIS_API_KEY || !process.env.NEXT_PUBLIC_MORALIS_API_URL) {
-                alert('Moralis API Key or URL is not defined');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Moralis API Key or URL is not defined',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -80,7 +104,13 @@ const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
                 processNFTData(data);
             }
         } catch (error) {
-            console.error('Error:', error);
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Could not fetch NFT data',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
         }
     };
 
@@ -172,7 +202,7 @@ const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
                             <span>Back</span>
                         </button>
 
-                        {/** NFT detail */}
+                        {/* NFT detail */}
                         {nft && (
                             <div className='mx-auto mt-8 max-w-2xl px-4 sm:px-6 lg:max-w-7xl lg:px-8'>
                                 <div className='lg:grid lg:auto-rows-min lg:grid-cols-12 lg:gap-x-8'>
@@ -278,6 +308,9 @@ const NFTComponent = ({ chainId, tokenAddress, tokenId }: NFTProps) => {
                     </div>
                 </>
             )}
+
+            {/* Alert Dialog */}
+            <AlertDialog open={isDialogVisible} setOpen={(show) => showDialog(show)} {...alertDialog} />
         </>
     );
 };

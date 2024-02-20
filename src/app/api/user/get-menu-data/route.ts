@@ -5,6 +5,9 @@ import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
+/**
+ * Function to get the menu data for the user
+ */
 const GetMenuData = async (req: NextRequest, res: NextResponse) => {
     // Only allow GET requests
     if (req.method !== 'GET') {
@@ -22,9 +25,9 @@ const GetMenuData = async (req: NextRequest, res: NextResponse) => {
         const folders = await getUserFolders(user.user_id);
         return NextResponse.json({ message: 'User menu data', folders: folders }, { status: 200 });
     } catch (error) {
-        console.error('Error generating challenge', error);
+        console.error('Error getting menu data', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
-}
+};
 
-export { GetMenuData as GET }
+export { GetMenuData as GET };

@@ -2,7 +2,6 @@ import { TestUser } from '@/types/User';
 import { TestItem } from '@/types/Item';
 import { PrismaClient } from '@prisma/client';
 import { saveItem } from '@/services/databaseService';
-import fs from 'fs';
 import path from 'path';
 
 // This should be replaced with the actual test user's ID after creation
@@ -28,9 +27,9 @@ export const testItem = {
     folder: {
         id: -1,
         name: 'Test Folder 00000001',
-        parent_folder_id: 0
+        parent_folder_id: 0,
     },
-    tags: ["Test Tag 00000001", "Test Tag 00000002", "Test Tag 00000003", "Test Tag 00000004", "Test Tag 00000005"],
+    tags: ['Test Tag 00000001', 'Test Tag 00000002', 'Test Tag 00000003', 'Test Tag 00000004', 'Test Tag 00000005'],
 };
 
 // Static test items
@@ -45,7 +44,7 @@ export const testItems = [
             name: 'Test Folder 00000001',
             parent_folder_id: 0, // 0 indicates no parent folder
         },
-        tags: ["Test Tag 00000001", "Test Tag 00000002"],
+        tags: ['Test Tag 00000001', 'Test Tag 00000002'],
     },
     {
         name: 'Test Item 00000002',
@@ -57,7 +56,7 @@ export const testItems = [
             name: 'Test Folder 00000002',
             parent_folder_id: 0,
         },
-        tags: ["Test Tag 00000003", "Test Tag 00000004"],
+        tags: ['Test Tag 00000003', 'Test Tag 00000004'],
     },
     {
         name: 'Test Item 00000003',
@@ -69,8 +68,8 @@ export const testItems = [
             name: 'Test Folder 00000003',
             parent_folder_id: 0,
         },
-        tags: ["Test Tag 00000005", "Test Tag 00000006"],
-    }
+        tags: ['Test Tag 00000005', 'Test Tag 00000006'],
+    },
 ];
 
 /**
@@ -81,7 +80,6 @@ export const generateTestUser = () => {
     // Generate random postfix to avoid conflicts
     const postfix = Math.floor(Math.random() * 1000000);
 
-
     const testUser: TestUser = {
         first_name: 'Test',
         last_name: `User ${postfix}`,
@@ -90,7 +88,7 @@ export const generateTestUser = () => {
     };
 
     return testUser;
-}
+};
 
 /**
  * Function to generate a test item
@@ -115,7 +113,7 @@ export const generateTestItem = (userId: number = 0) => {
     };
 
     return testItem;
-}
+};
 
 /**
  * Function to save a test user to the database
@@ -134,7 +132,7 @@ export const createTestUser = async (user: TestUser) => {
     });
 
     return newUser.user_id;
-}
+};
 
 /**
  * Function to remove a test user from the database
@@ -148,7 +146,7 @@ export const removeTestUser = async (email: string) => {
             email: email,
         },
     });
-}
+};
 
 /**
  * Function to save a test item to the database
@@ -165,7 +163,7 @@ export const createTestItem = async (item: TestItem) => {
     const newItem = await prisma.item.findFirst({
         where: {
             name: item.name,
-        }
+        },
     });
 
     if (!newItem) {
@@ -174,7 +172,7 @@ export const createTestItem = async (item: TestItem) => {
 
     // Return the item_id
     return newItem.item_id;
-}
+};
 
 /**
  * Remove a test item from the database
@@ -187,31 +185,31 @@ export const removeTestItem = async (item: TestItem) => {
     const itemToRemove = await prisma.item.findFirst({
         where: {
             name: item.name,
-        }
+        },
     });
 
     // Get the test folder
     const folderToRemove = await prisma.folder.findFirst({
         where: {
             name: item.folder.name,
-        }
+        },
     });
 
     // Get the test tags
     const tagsToRemove = await prisma.tag.findMany({
         where: {
             name: {
-                in: item.tags
-            }
-        }
+                in: item.tags,
+            },
+        },
     });
 
     // Remove the test folder
     if (folderToRemove) {
         await prisma.folder.delete({
             where: {
-                folder_id: folderToRemove.folder_id
-            }
+                folder_id: folderToRemove.folder_id,
+            },
         });
     }
 
@@ -240,12 +238,11 @@ export const removeTestItem = async (item: TestItem) => {
     if (itemToRemove) {
         await prisma.item.delete({
             where: {
-                item_id: itemToRemove.item_id
-            }
+                item_id: itemToRemove.item_id,
+            },
         });
     }
-
-}
+};
 
 /**
  * Function to create test items
@@ -290,4 +287,4 @@ export const removeTestFolder = async (folderName: string) => {
             name: folderName,
         },
     });
-}
+};

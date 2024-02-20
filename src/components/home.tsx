@@ -1,20 +1,20 @@
+/**
+ * Home component
+ * This is a client component and all the code is executed on the client side
+ */
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { HomeComponentProps } from '../types/Home';
-import SetMasterPassword from './set-master-password';
-import EnterMasterPassword from './enter-master-password';
+import { HomeComponentProps } from '@/types/Home';
+import SetMasterPassword from '@/components/auth/set-master-password';
+import EnterMasterPassword from '@/components/auth/enter-master-password';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import { useRouter } from 'next/navigation';
-import LoadingModal from './loading-modal';
+import LoadingModal from '@/components/common/loading-modal';
 import { useSession } from 'next-auth/react';
 import { User } from '@/types/User';
 import { useSideMenu } from '@/context/UserProvider';
 
-/**
-* The home component
-* @param event 
-*/
 const HomeComponent = ({ salt }: HomeComponentProps) => {
     // State to set the overlay visibility
     const [isPasswordSet, setIsPasswordSet] = useState(salt === null);
@@ -40,8 +40,6 @@ const HomeComponent = ({ salt }: HomeComponentProps) => {
         const checkMasterPassword = async () => {
             if (salt) {
                 const masterPassword = await getMasterPasswordFromServiceWorker();
-                console.log('Master password from service worker:');
-                console.log(masterPassword);
 
                 if (masterPassword) {
                     // route the all items page

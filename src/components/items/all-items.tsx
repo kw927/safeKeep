@@ -1,10 +1,14 @@
+/**
+ * AllItems component
+ * This is a client component and all the code is executed on the client side.  
+ */
+
 'use client'
 import { AllItemsProps } from '@/types/Item';
 import { useRouter } from 'next/navigation';
 import { useSearch } from '@/context/SearchProvider';
 import { useEffect, useState } from 'react';
 import { ListItem } from '@/types/Item';
-import { classNames } from '@/utils/pageUtils';
 
 const AllItems = ({ items }: AllItemsProps) => {
     const { searchQuery } = useSearch();
@@ -28,6 +32,7 @@ const AllItems = ({ items }: AllItemsProps) => {
     return (
         <div>
             <ul role="list" className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+                {/* List of items */}
                 {filteredItems.map((item) => (
                     <li key={item.name} className="col-span-1 flex rounded-md shadow-sm" style={{ width: '300px' }}>
                         <div

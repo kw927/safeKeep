@@ -1,12 +1,16 @@
+/**
+ * TOTP Setup Page
+ * This page is a server component and all the code is executed on the server side.
+ */
 
-import React, { useState, FormEvent, useEffect } from 'react';
+import React from 'react';
 import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { authenticator } from 'otplib';
-import { encryptText, decryptText } from '../../services/cryptoServiceClient';
+import { encryptText } from '@/services/cryptoServiceClient';
 import qrcode from 'qrcode';
-import TOTPSetps from '../../components/totp-steps';
+import TOTPSetps from '@/components/auth/totp-steps';
 import { TOTPData } from '@/types/Totp';
 
 // Declare the prisma client
@@ -15,7 +19,7 @@ const prisma = new PrismaClient();
 /**
  * Function to get the TOTP setup URL
  * Note: This function is called from the server side and not the client side
- * @returns 
+ * @returns
  */
 const getTOTPSetupUrl = async () => {
     // Get the authenticated session to determine if the user is logged in
@@ -30,8 +34,8 @@ const getTOTPSetupUrl = async () => {
         // Get the user from the database
         const user = await prisma.user.findUnique({
             where: {
-                email: session.user.email
-            }
+                email: session.user.email,
+            },
         });
 
         // Return if the user has already enabled totp, since this page is only for setting up totp
@@ -40,7 +44,7 @@ const getTOTPSetupUrl = async () => {
                 totpEnabled: true,
                 totpQRCode: null,
                 totpKeyUri: null,
-                totpSecret: null
+                totpSecret: null,
             } as TOTPData;
         }
 
@@ -53,35 +57,33 @@ const getTOTPSetupUrl = async () => {
         // Save the encrypted secret to the database
         await prisma.user.update({
             where: {
-                email: session.user.email
+                email: session.user.email,
             },
             data: {
                 totp_secret: encryptedSecret,
-                totp_enabled: false
-            }
+                totp_enabled: false,
+            },
         });
 
         // Generate the QR code and convert it to a data URL for the client to display
-        const keyUri = authenticator.keyuri(session.user.email, 'SafeKeep', secret)
+        const keyUri = authenticator.keyuri(session.user.email, 'SafeKeep', secret);
         const QRCode = await qrcode.toDataURL(keyUri);
 
         return {
             totpEnabled: false,
             totpQRCode: QRCode,
             totpKeyUri: keyUri,
-            totpSecret: secret
+            totpSecret: secret,
         } as TOTPData;
-
     } catch (error) {
         console.error('Failed to get user:', error);
         return null;
     }
-}
+};
 
 /**
  * Function for the TOTP setup page
- * Note: This function is also called from the server side and not the client side
- * @returns 
+ * @returns
  */
 const TOTPSetup = async () => {
     // Get the TOTP data
@@ -90,7 +92,7 @@ const TOTPSetup = async () => {
     // Redirect to home page if totp is already enabled
     if (totpData && totpData.totpEnabled) {
         redirect('/home');
-    };
+    }
 
     // Show error if totp data is not available
     if (!totpData) {
@@ -98,7 +100,7 @@ const TOTPSetup = async () => {
             <div>
                 <h1>Error getting TOTP data</h1>
             </div>
-        )
+        );
     }
 
     // Render the TOTP setup page
@@ -107,7 +109,7 @@ const TOTPSetup = async () => {
             <h1>TOTPSetup</h1>
             <TOTPSetps totpData={totpData} />
         </div>
-    )
+    );
 };
 
 export default TOTPSetup;

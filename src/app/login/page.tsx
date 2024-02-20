@@ -1,19 +1,25 @@
-'use client'
+/**
+ * Login page
+ * This page is a client component and all the code is executed on the client side.
+ */
+
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from "next-auth/react"
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types/User';
-import LoginForm from '@/components/login-form';
-import TotpVerifyForm from '@/components/totp-verify-form';
+import LoginForm from '@/components/auth/login-form';
+import TotpVerifyForm from '@/components/auth/totp-verify-form';
 
+// Enum to define the login step
 export enum LoginStep {
     DisplayLoginForm,
     EnterTotpCode,
 }
 
 // Function to render the login step
-const LoginStepRenderer = ({ step, current, children }: { step: LoginStep, current: LoginStep, children: JSX.Element }) => {
+const LoginStepRenderer = ({ step, current, children }: { step: LoginStep; current: LoginStep; children: JSX.Element }) => {
     return step === current ? children : null;
 };
 
@@ -22,6 +28,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // State to store the current login step
     const [currentStep, setCurrentStep] = useState(LoginStep.DisplayLoginForm);
 
     // Get the authenticated session
@@ -48,12 +55,14 @@ const Login = () => {
 
     return (
         <>
+            {/* The login page */}
             <LoginStepRenderer step={LoginStep.DisplayLoginForm} current={currentStep}>
                 <>
                     <LoginForm email={email} setEmail={setEmail} password={password} setPassword={setPassword} setCurrentStep={setCurrentStep} />
                 </>
             </LoginStepRenderer>
 
+            {/* The totp verify page */}
             <LoginStepRenderer step={LoginStep.EnterTotpCode} current={currentStep}>
                 <>
                     <TotpVerifyForm email={email} password={password} />

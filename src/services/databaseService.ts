@@ -5,13 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import { EncryptedFile } from '@/types/Crypto';
-import { ValidationError } from '@/types/ValidationError'
+import { ValidationError } from '@/types/ValidationError';
 
 const prisma = new PrismaClient();
 
 // The type definition for PrismaClient for transactions
-// Code adapted from: https://stackoverflow.com/questions/77209892/pass-prisma-transaction-into-a-function-in-typescript 
-type PrismaTransactionClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">
+// Code adapted from: https://stackoverflow.com/questions/77209892/pass-prisma-transaction-into-a-function-in-typescript
+type PrismaTransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 
 /**
  * Function to get the user from the database by email
@@ -22,8 +22,8 @@ export const getUserByEmail = async (email: string) => {
     // Get the user from the database
     const user = await prisma.user.findUnique({
         where: {
-            email: email
-        }
+            email: email,
+        },
     });
 
     return user;
@@ -41,7 +41,7 @@ export const getUserItemById = async (itemId: number, userId: number) => {
         where: {
             item_id: itemId,
             user_id: userId,
-            is_deleted: false
+            is_deleted: false,
         },
         select: {
             item_id: true,
@@ -55,31 +55,31 @@ export const getUserItemById = async (itemId: number, userId: number) => {
                 select: {
                     folder_id: true,
                     name: true,
-                    parent_folder_id: true
-                }
+                    parent_folder_id: true,
+                },
             },
             files: {
                 select: {
                     file_id: true,
                     original_file_name: true,
                     original_file_type: true,
-                    file_path: true
-                }
+                    file_path: true,
+                },
             },
             item_tags: {
                 select: {
                     tag: {
                         select: {
-                            name: true
-                        }
-                    }
-                }
-            }
-        }
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 
     return item;
-}
+};
 
 /**
  * Function to get the items for the user in a folder
@@ -93,21 +93,21 @@ export const getUserListItemsByFolderId = async (folderId: number, userId: numbe
         where: {
             user_id: userId,
             folder_id: folderId,
-            is_deleted: false
+            is_deleted: false,
         },
         select: {
             item_id: true,
             name: true,
             description: true,
-            is_favorite: true
+            is_favorite: true,
         },
         orderBy: {
-            name: 'asc'
-        }
+            name: 'asc',
+        },
     });
 
     return items;
-}
+};
 
 /**
  * Function to get the a folder from a user
@@ -120,12 +120,12 @@ export const getFolder = async (folderId: number, userId: number) => {
     const folder = await prisma.folder.findUnique({
         where: {
             folder_id: folderId,
-            user_id: userId
-        }
+            user_id: userId,
+        },
     });
 
     return folder;
-}
+};
 
 /**
  * Function to get the folders for a user
@@ -139,8 +139,8 @@ export const getUserFolders = async (userId: number) => {
             user_id: userId,
         },
         orderBy: {
-            name: 'asc'
-        }
+            name: 'asc',
+        },
     });
 
     /**
@@ -165,14 +165,14 @@ export const getUserFolders = async (userId: number) => {
         const folderMap: { [key: number]: SideMenuFolder } = {};
 
         // Initialise each folder with a children array and add it to the map
-        folders.forEach(folder => {
+        folders.forEach((folder) => {
             folderMap[folder.folder_id] = transformToSideMenuFolder(folder);
         });
 
         // Organise folders by their parent
         const rootFolders: SideMenuFolder[] = [];
 
-        folders.forEach(folder => {
+        folders.forEach((folder) => {
             const sideMenuFolder = folderMap[folder.folder_id];
 
             if (folder.parent_folder_id && folder.parent_folder_id > 0 && folderMap[folder.parent_folder_id]) {
@@ -189,7 +189,7 @@ export const getUserFolders = async (userId: number) => {
     const folderTree = buildFolderTree(folders);
 
     return folderTree;
-}
+};
 
 /**
  * Function to save the item to the database
@@ -198,16 +198,23 @@ export const getUserFolders = async (userId: number) => {
  * @param name {string} The item name
  * @param description {string} The item description
  * @param data {string} The item data
- * @param folder {id: number, name: string, parent_folder_id: number} The folder object 
+ * @param folder {id: number, name: string, parent_folder_id: number} The folder object
  * @param files {EncryptedFile[]} The encrypted files
  * @param tags {string[]} The tags
  */
-export const saveItem = async (userId: number, name: string, description: string, data: string, folder: any, files: EncryptedFile[], tags: string[]) => {
+export const saveItem = async (
+    userId: number,
+    name: string,
+    description: string,
+    data: string,
+    folder: any,
+    files: EncryptedFile[],
+    tags: string[]
+) => {
     // Save the item to the database
     try {
         // Use a transaction to save the item and files to the database
         const result = await prisma.$transaction(async (tx) => {
-
             // Create the folder
             // Update the folder.id with the newly created folder id
             folder.id = await createFolder(tx, userId, folder);
@@ -240,10 +247,9 @@ export const saveItem = async (userId: number, name: string, description: string
             return item.item_id;
         });
     } catch (error) {
-        console.log('Error saving the item:', error);
         throw new Error('Error saving the item');
     }
-}
+};
 
 /**
  * Function to update the item
@@ -254,12 +260,22 @@ export const saveItem = async (userId: number, name: string, description: string
  * @param name {string} The item name
  * @param description {string} The item description
  * @param data {string} The item data
- * @param folder {id: number, name: string, parent_folder_id: number} The folder object 
+ * @param folder {id: number, name: string, parent_folder_id: number} The folder object
  * @param files {EncryptedFile[]} The encrypted files
  * @param tags {string[]} The tags
- * @returns 
+ * @returns
  */
-export const updateItem = async (method: string, itemId: number, userId: number, name: string, description: string, data: string, folder: any, files: EncryptedFile[], tags: string[]) => {
+export const updateItem = async (
+    method: string,
+    itemId: number,
+    userId: number,
+    name: string,
+    description: string,
+    data: string,
+    folder: any,
+    files: EncryptedFile[],
+    tags: string[]
+) => {
     // TODO: Implement PUT and PATCH methods for full and partial updates
 
     try {
@@ -309,10 +325,9 @@ export const updateItem = async (method: string, itemId: number, userId: number,
 
         return true;
     } catch (error) {
-        console.error('Error updating the item:', error);
         throw new ValidationError('Internal server error', 500);
     }
-}
+};
 
 /**
  * Function to create a new folder
@@ -344,7 +359,7 @@ export const createFolder = async (tx: PrismaTransactionClient, userId: number, 
     }
 
     return folder.id;
-}
+};
 
 /**
  * Function to save the files to the database and local storage
@@ -399,7 +414,7 @@ export const saveFiles = async (tx: PrismaTransactionClient, files: EncryptedFil
 
     // Await all the file creations
     await Promise.all(fileCreations);
-}
+};
 
 /**
  * Function to associate the tags with the item
@@ -436,14 +451,14 @@ export const associateTags = async (tx: PrismaTransactionClient, tags: string[],
                 },
                 tag: {
                     connect: { tag_id: tag.tag_id },
-                }
+                },
             },
         });
     });
 
     // Await all the tag links creations
     await Promise.all(tagLinks);
-}
+};
 
 /**
  * Function to get user's wallets
@@ -453,8 +468,8 @@ export const getUserWallets = async (userId: number) => {
     try {
         return await prisma.web3Wallet.findMany({
             where: {
-                user_id: userId
-            }
+                user_id: userId,
+            },
         });
     } catch (error) {
         console.error('Failed to get user wallets:', error);

@@ -43,7 +43,7 @@ const handler = NextAuth({
             credentials: {
                 email: {},
                 password: {},
-                totpCode: {}
+                totpCode: {},
             },
             // The authorize function will receive the credentials object
             async authorize(credentials, req) {
@@ -60,8 +60,8 @@ const handler = NextAuth({
                 // Get the user from the database
                 const user = await prisma.user.findUnique({
                     where: {
-                        email: credentials.email
-                    }
+                        email: credentials.email,
+                    },
                 });
 
                 if (user) {
@@ -99,15 +99,15 @@ const handler = NextAuth({
                         firstName: user.first_name,
                         lastName: user.last_name,
                         email: user.email,
-                        totp: user.totp_enabled
-                    }
+                        totp: user.totp_enabled,
+                    };
 
-                    return userInSession
+                    return userInSession;
                 }
 
                 return null;
-            }
-        })
+            },
+        }),
     ],
     callbacks: {
         async jwt({ token, user, session, account }) {
@@ -117,16 +117,6 @@ const handler = NextAuth({
             }
 
             return { ...token, ...user };
-
-            // on the subsequent calls, jwt callback will receive the token object
-            // so we can refresh the token on the subsequent calls
-            // if (token?.accessTokenExpires) {
-            //     // check if the access token is expired
-            //     if (Date.now() / 1000 < token.accessTokenExpires) {
-            //         // access token is not expired, so we can just return the token
-            //         return token;
-            //     }
-            // }
         },
         async session({ session, token }) {
             // Check if the token contains the required fields
@@ -142,8 +132,8 @@ const handler = NextAuth({
                     firstName: token.firstName as string,
                     lastName: token.lastName as string,
                     email: session.user?.email as string,
-                    totp: token.totp as boolean
-                }
+                    totp: token.totp as boolean,
+                },
             };
         },
     },
@@ -152,4 +142,4 @@ const handler = NextAuth({
     },
 });
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };

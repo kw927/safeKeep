@@ -4,6 +4,11 @@ import { getUserFromSession } from '@/utils/userAccountUtils';
 
 const prisma = new PrismaClient();
 
+/**
+ * Function to set the master password for a user
+ * This API will save the public key generated on the client to the database
+ * @param publickKey {string} The public key generated on the client
+ */
 const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
     if (req.method !== 'POST') {
@@ -44,11 +49,11 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
     try {
         await prisma.user.update({
             where: {
-                email: user.email
+                email: user.email,
             },
             data: {
-                public_key: publicKey
-            }
+                public_key: publicKey,
+            },
         });
 
         return NextResponse.json({ message: 'Public key saved successfully' }, { status: 200 });
@@ -56,6 +61,6 @@ const SetMasterPassword = async (req: NextRequest, res: NextResponse) => {
         console.error('Error saving public key:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
-}
+};
 
-export { SetMasterPassword as POST }
+export { SetMasterPassword as POST };

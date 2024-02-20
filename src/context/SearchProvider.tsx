@@ -1,7 +1,7 @@
 /**
  * This file contains the context provider for the search query.
  */
-'use client'
+'use client';
 
 import React, { ReactNode, createContext, useContext, useState } from 'react';
 
@@ -14,7 +14,7 @@ interface SearchContextType {
 // Providing a default value matching the context type
 const defaultValue: SearchContextType = {
     searchQuery: '',
-    setSearchQuery: () => { }, // Function placeholder
+    setSearchQuery: () => {}, // Function placeholder
 };
 
 // Create the SearchContext
@@ -27,9 +27,5 @@ export const useSearch = () => useContext(SearchContext);
 export const SearchProvider = ({ children }: { children: ReactNode }) => {
     const [searchQuery, setSearchQuery] = useState('');
 
-    return (
-        <SearchContext.Provider value={{ searchQuery, setSearchQuery }}>
-            {children}
-        </SearchContext.Provider>
-    );
+    return <SearchContext.Provider value={{ searchQuery, setSearchQuery }}>{children}</SearchContext.Provider>;
 };

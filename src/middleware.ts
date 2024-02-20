@@ -39,8 +39,8 @@ export default withAuth({
                 return false;
             }
 
-            // Since PrismaClient cannot run in Vercel Edge Functions
-            // Each route should check if the user exists in the database and not disabled or deleted
+            // Note: Since PrismaClient cannot run in Vercel Edge Functions (this middleware runs in  Vercel Edge Function), we cannot check if the user exists in the database
+            // So that each route should check if the user exists in the database and not disabled or deleted
 
             return true;
         },

@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 /**
  * API to save the user's web3 wallet
  * Currently only one wallet per user is supported
- * @param req {NextRequest} 
- * @param res {NextResponse}
+ * @param encryptedWallet {string} The encrypted wallet
+ * @param walletName {string} The name of the wallet
  */
 const SaveWallet = async (req: NextRequest, res: NextResponse) => {
     // Only allow POST requests
@@ -55,8 +55,8 @@ const SaveWallet = async (req: NextRequest, res: NextResponse) => {
                 encrypted_wallet: encryptedWallet,
                 wallet_name: walletName,
                 created_at: new Date(),
-                updated_at: new Date()
-            }
+                updated_at: new Date(),
+            },
         });
 
         if (!wallet) {
@@ -69,6 +69,6 @@ const SaveWallet = async (req: NextRequest, res: NextResponse) => {
         console.error('Error verifying signature:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
-}
+};
 
-export { SaveWallet as POST }
+export { SaveWallet as POST };

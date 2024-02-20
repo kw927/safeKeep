@@ -1,9 +1,15 @@
+/**
+ * Web3WalletSteps component to create or import a wallet
+ * This is a client component and all the code is executed on the client side
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ethers, Mnemonic } from 'ethers';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
+import AlertDialog from '@/components/common/alert-dialog';
+import { useAlertDialog } from '@/components/hook/use-alert-dialog';
 
 // Enum for wallet setup steps
 enum Step {
@@ -14,7 +20,7 @@ enum Step {
 }
 
 // Function to render the setup step
-const SetupStep = ({ step, current, children }: { step: Step, current: Step, children: JSX.Element }) => {
+const SetupStep = ({ step, current, children }: { step: Step; current: Step; children: JSX.Element }) => {
     return step === current ? children : null;
 };
 
@@ -32,6 +38,9 @@ const Web3WalletSetps = () => {
     const [shuffledWords, setShuffledWords] = useState<string[]>([]);
     const [selectedFirst, setSelectedFirst] = useState('');
     const [selectedLast, setSelectedLast] = useState('');
+
+    // State to manage the alert dialog
+    const { isDialogVisible, alertDialog, showDialog } = useAlertDialog();
 
     // The router object for redirecting the user to different pages
     const router = useRouter();
@@ -64,7 +73,13 @@ const Web3WalletSetps = () => {
             setWallet(newWallet);
             setCurrentStep(Step.DisplayWalletPhrase);
         } catch (error) {
-            alert("Failed to create a new wallet. Please try again.");
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to create a new wallet. Please try again.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
         }
     };
 
@@ -75,7 +90,14 @@ const Web3WalletSetps = () => {
         if (wallet?.mnemonic?.phrase) {
             {
                 await navigator.clipboard.writeText(wallet.mnemonic.phrase);
-                alert('Wallet phrase copied to clipboard');
+
+                showDialog(true, {
+                    type: 'success',
+                    title: 'Success',
+                    message: 'Wallet phrase copied to clipboard!',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
             }
         }
     };
@@ -95,12 +117,19 @@ const Web3WalletSetps = () => {
 
     /**
      * Function for VerifyNewWallet step to verify the selected words
-     * @returns 
+     * @returns
      */
     const verifySelectedWords = async () => {
         // Check if the wallet is generated
         if (!wallet?.mnemonic?.phrase) {
-            alert('Failed to verify wallet phrase. Please try again.');
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to verify wallet phrase. Please try again.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return;
         }
 
@@ -113,14 +142,28 @@ const Web3WalletSetps = () => {
             const encryptedWallet = await encryptWallet(wallet);
 
             if (!encryptedWallet) {
-                alert('Failed to encrypt wallet. Please try again.');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to encrypt wallet. Please try again.',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
             const saveWalletResult = await saveWalletToBackend('Default Wallet', encryptedWallet);
 
             if (!saveWalletResult) {
-                alert('Failed to save wallet. Please try again.');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to save wallet. Please try again.',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -132,7 +175,14 @@ const Web3WalletSetps = () => {
 
             router.push('/web3/crypto');
         } else {
-            alert('Failed to verify wallet phrase. Please try again.');
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to verify wallet phrase. Please try again.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             // Clear the selected words when verification fails
             setSelectedFirst('');
             setSelectedLast('');
@@ -151,10 +201,17 @@ const Web3WalletSetps = () => {
 
             return encryptedWallet;
         } catch (error) {
-            console.error('Failed to encrypt wallet:', error);
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to encrypt wallet.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return null;
         }
-    }
+    };
 
     /**
      * Function to call the API to save the wallet to the backend
@@ -181,16 +238,23 @@ const Web3WalletSetps = () => {
         } catch (error) {
             return false;
         }
-    }
+    };
 
     /**
      * Function to import a wallet from the mnemonic phrase
-     * @returns 
+     * @returns
      */
     const importFromMnemonic = async () => {
         // Validate the recovery phrase using ethers.js
         if (!Mnemonic.isValidMnemonic(mnemonic)) {
-            alert("Please enter a valid 12-word recovery phrase.");
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Please enter a valid 12-word recovery phrase.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return;
         }
 
@@ -198,8 +262,15 @@ const Web3WalletSetps = () => {
         try {
             const importedWallet = ethers.Wallet.fromPhrase(mnemonic);
 
-            if(!importedWallet) {
-                alert("Failed to import wallet. Please check your recovery phrase and try again.");
+            if (!importedWallet) {
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to import wallet. Please check your recovery phrase and try againn.',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -207,7 +278,14 @@ const Web3WalletSetps = () => {
             const encryptedWallet = await encryptWallet(importedWallet);
 
             if (!encryptedWallet) {
-                alert('Failed to encrypt wallet. Please try again.');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to encrypt wallet. Please try again.',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -215,7 +293,14 @@ const Web3WalletSetps = () => {
             const saveWalletResult = await saveWalletToBackend('Default Wallet', encryptedWallet);
 
             if (!saveWalletResult) {
-                alert('Failed to save wallet. Please try again.');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Failed to save wallet. Please try again.',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -226,27 +311,35 @@ const Web3WalletSetps = () => {
             // Redirect to the crypto page
             router.push('/web3/crypto');
         } catch (error) {
-            console.error("Failed to import wallet:", error);
-            alert("Failed to import wallet. Please check your recovery phrase and try again.");
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to import wallet. Please check your recovery phrase and try again.',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
         }
-    }
+    };
 
     return (
         <>
-            {/** Wallet setup options */}
+            {/* Wallet setup options */}
             <SetupStep step={Step.WalletOtpoins} current={currentStep}>
-                <div className="space-y-4 text-center">
-                    <h1 className="text-xl font-semibold text-gray-900">Create or import a wallet</h1>
-                    <p className="text-sm text-gray-500">Choose to create a new wallet or import your existing one.</p>
-                    <div className="flex gap-4">
+                <div className='space-y-4 text-center'>
+                    {/* Title and description */}
+                    <h1 className='text-xl font-semibold text-gray-900'>Create or import a wallet</h1>
+                    <p className='text-sm text-gray-500'>Choose to create a new wallet or import your existing one.</p>
+
+                    {/* Buttons to create or import a wallet */}
+                    <div className='flex gap-4'>
                         <button
-                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className='inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                             onClick={createNewWallet}
                         >
                             Create New Wallet
                         </button>
                         <button
-                            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className='inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
                             onClick={() => setCurrentStep(Step.ImportWallet)}
                         >
                             I Already Have a Wallet
@@ -255,31 +348,32 @@ const Web3WalletSetps = () => {
                 </div>
             </SetupStep>
 
-
-            {/** Display wallet phrase */}
+            {/* Display wallet phrase */}
             <SetupStep step={Step.DisplayWalletPhrase} current={currentStep}>
                 <>
-                    <div className="space-y-4 text-center">
-                        <h1 className="text-xl font-semibold text-gray-900">Your Wallet Phrase</h1>
+                    <div className='space-y-4 text-center'>
+                        {/* Title */}
+                        <h1 className='text-xl font-semibold text-gray-900'>Your Wallet Phrase</h1>
 
-                        <div className="flex flex-col items-center w-full px-6">
-                            <div className="w-full mb-6 bg-white shadow-lg rounded-lg p-4">
-                                <p className="text-lg text-center">{wallet?.mnemonic?.phrase}</p>
+                        <div className='flex flex-col items-center w-full px-6'>
+                            {/* Wallet phrase */}
+                            <div className='w-full mb-6 bg-white shadow-lg rounded-lg p-4'>
+                                <p className='text-lg text-center'>{wallet?.mnemonic?.phrase}</p>
                             </div>
 
-                            <p className="text-md text-gray-600 mb-6 text-center">
-                                Please make sure you've saved this phrase somewhere safe!
-                            </p>
+                            <p className='text-md text-gray-600 mb-6 text-center'>Please make sure you've saved this phrase somewhere safe!</p>
 
+                            {/* Copy to clipboard buttons */}
                             <button
-                                className="mb-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className='mb-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
                                 onClick={copyToClipboard}
                             >
                                 Copy to Clipboard
                             </button>
 
+                            {/* Process to verify button */}
                             <button
-                                className="px-4 border border-indigo-600 text-indigo-600 py-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className='px-4 border border-indigo-600 text-indigo-600 py-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
                                 onClick={processToVerify}
                             >
                                 I've backed it up, continue
@@ -292,12 +386,13 @@ const Web3WalletSetps = () => {
             {/* Verify new wallet */}
             <SetupStep step={Step.VerifyNewWallet} current={currentStep}>
                 <>
-                    <div className="space-y-4 text-center">
-                        <h1 className="text-xl font-semibold text-gray-900">Verify Wallet Phrase</h1>
-                        <p className="text-md text-gray-600 mb-6 text-center">
-                            Please select the first and last words from your phrase.
-                        </p>
-                        <div className="flex flex-wrap justify-center items-center mb-4">
+                    <div className='space-y-4 text-center'>
+                        {/* Title and description */}
+                        <h1 className='text-xl font-semibold text-gray-900'>Verify Wallet Phrase</h1>
+                        <p className='text-md text-gray-600 mb-6 text-center'>Please select the first and last words from your phrase.</p>
+
+                        {/* Display the shuffled word as options to select the first and last words */}
+                        <div className='flex flex-wrap justify-center items-center mb-4'>
                             {shuffledWords.map((word, index) => (
                                 <button
                                     key={index}
@@ -305,16 +400,20 @@ const Web3WalletSetps = () => {
                                         if (!selectedFirst) setSelectedFirst(word);
                                         else if (!selectedLast && word !== selectedFirst) setSelectedLast(word);
                                     }}
-                                    className={`m-2 px-4 py-2 border rounded-md ${word === selectedFirst || word === selectedLast ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-300'} flex flex-col items-center`}
+                                    className={`m-2 px-4 py-2 border rounded-md ${
+                                        word === selectedFirst || word === selectedLast ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-300'
+                                    } flex flex-col items-center`}
                                 >
                                     <span>{word}</span>
-                                    {word === selectedFirst && <span className="text-xs text-green-600 mt-1">First</span>}
-                                    {word === selectedLast && <span className="text-xs text-red-600 mt-1">Last</span>}
+                                    {word === selectedFirst && <span className='text-xs text-green-600 mt-1'>First</span>}
+                                    {word === selectedLast && <span className='text-xs text-red-600 mt-1'>Last</span>}
                                 </button>
                             ))}
                         </div>
+
+                        {/* Verify button */}
                         <button
-                            className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            className='px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors'
                             onClick={verifySelectedWords}
                         >
                             Verify
@@ -323,23 +422,26 @@ const Web3WalletSetps = () => {
                 </>
             </SetupStep>
 
-            {/** Import wallet */}
+            {/* Import wallet */}
             <SetupStep step={Step.ImportWallet} current={currentStep}>
                 <>
-                    <div className="space-y-4 text-center">
-                        <h1 className="text-xl font-semibold text-gray-900">Import Your Wallet</h1>
-                        <p className="text-md text-gray-600 mb-6">
-                            Please enter your 12-word recovery phrase to import your wallet.
-                        </p>
+                    <div className='space-y-4 text-center'>
+                        {/* Title and description */}
+                        <h1 className='text-xl font-semibold text-gray-900'>Import Your Wallet</h1>
+                        <p className='text-md text-gray-600 mb-6'>Please enter your 12-word recovery phrase to import your wallet.</p>
+
+                        {/* Textarea to enter the recovery phrase */}
                         <textarea
-                            className="w-full p-4 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            className='w-full p-4 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
                             rows={4}
-                            placeholder="Enter 12-word recovery phrase"
+                            placeholder='Enter 12-word recovery phrase'
                             value={mnemonic}
                             onChange={(e) => setMnemonic(e.target.value)}
                         ></textarea>
+
+                        {/* Import wallet button */}
                         <button
-                            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                            className='mt-4 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors'
                             onClick={importFromMnemonic}
                         >
                             Import Wallet
@@ -347,8 +449,11 @@ const Web3WalletSetps = () => {
                     </div>
                 </>
             </SetupStep>
+
+            {/* Alert Dialog */}
+            <AlertDialog open={isDialogVisible} setOpen={(show) => showDialog(show)} {...alertDialog} />
         </>
-    )
-}
+    );
+};
 
 export default Web3WalletSetps;

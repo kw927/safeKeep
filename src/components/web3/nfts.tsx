@@ -1,3 +1,7 @@
+/**
+ * NFTs component to display the NFTs in the wallet
+ * This is a client component and all the code is executed on the client side.
+ */
 'use client';
 import React, { useEffect, useState } from 'react';
 import { EncryptedWalletProps } from '@/types/Crypto';
@@ -5,8 +9,10 @@ import { Wallet } from 'ethers';
 import { useRouter } from 'next/navigation';
 import { getMasterPasswordFromServiceWorker } from '@/services/serviceWorkerUtils';
 import Image from 'next/image';
-import LoadingModal from './loading-modal';
+import LoadingModal from '@/components/common/loading-modal';
 import { NFTAttributes, DisplayNFT } from '@/types/Crypto';
+import AlertDialog from '@/components/common/alert-dialog';
+import { useAlertDialog } from '@/components/hook/use-alert-dialog';
 
 const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
     const router = useRouter();
@@ -29,11 +35,21 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
     // State to store the loading status
     const [isLoading, setIsLoading] = useState(true);
 
+    // State to manage the alert dialog
+    const { isDialogVisible, alertDialog, showDialog } = useAlertDialog();
+
     const getNFTs = async (chain: string, walletAddress: string) => {
         try {
             // Call the API only if it is defined in environment variables
             if (!process.env.NEXT_PUBLIC_MORALIS_API_KEY || !process.env.NEXT_PUBLIC_MORALIS_API_URL) {
-                alert('Moralis API Key or URL is not defined');
+                showDialog(true, {
+                    type: 'error',
+                    title: 'Error',
+                    message: 'Moralis API Key or URL is not defined',
+                    buttonText: 'OK',
+                    onButtonClick: () => showDialog(false),
+                });
+
                 return;
             }
 
@@ -59,7 +75,13 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                 processNFTData(data.result);
             }
         } catch (error) {
-            console.error('Error:', error);
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to fetch NFTs',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
         }
     };
 
@@ -92,7 +114,15 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
 
         if (!decryptedWallet) {
             setIsLoading(false);
-            alert('Error decrypting wallet');
+
+            showDialog(true, {
+                type: 'error',
+                title: 'Error',
+                message: 'Error decrypting wallet',
+                buttonText: 'OK',
+                onButtonClick: () => showDialog(false),
+            });
+
             return;
         }
 
@@ -103,7 +133,7 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
 
     /**
      * Function to process the NFT data
-     * @param nfts 
+     * @param nfts
      */
     const processNFTData = (nfts: any) => {
         const processedNFTs: DisplayNFT[] = nfts.map((nft: any) => {
@@ -138,7 +168,6 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
             };
         });
 
-        console.log('processedNFTs:', processedNFTs);
         setNFTs(processedNFTs);
     };
 
@@ -187,13 +216,14 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                             <h1 className='text-3xl font-bold tracking-tight text-gray-900'>{selectedChain.name}</h1>
                         </div>
 
-                        {/** NFTs */}
+                        {/* NFTs */}
                         <div className='grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-3 lg:gap-x-8'>
                             {nfts.map((nft) => (
                                 <div
                                     key={nft.tokenId}
                                     className='group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white'
                                 >
+                                    {/* NFT image */}
                                     <div className='aspect-h-4 aspect-w-3 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96'>
                                         <img
                                             src={nft.image}
@@ -201,13 +231,16 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                                             className='h-full w-full object-cover object-center sm:h-full sm:w-full'
                                         />
                                     </div>
+                                    {/* NFT details */}
                                     <div className='flex flex-1 flex-col space-y-2 p-4'>
+                                        {/* The name of the NFT and the link to the NFT page */}
                                         <h3 className='text-lg font-medium text-gray-900'>
                                             <a href={`/web3/nft/${selectedChain.chainId}/${nft.tokenAddress}/${nft.tokenId}`}>
                                                 <span aria-hidden='true' className='absolute inset-0' />
                                                 {nft.name}
                                             </a>
                                         </h3>
+                                        {/* The short description */}
                                         <p className='text-sm text-gray-500'>{nft.shortDescription}</p>
                                     </div>
                                 </div>
@@ -216,6 +249,9 @@ const NFTsComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
                     </div>
                 </>
             )}
+
+            {/* Alert Dialog */}
+            <AlertDialog open={isDialogVisible} setOpen={(show) => showDialog(show)} {...alertDialog} />
         </>
     );
 };

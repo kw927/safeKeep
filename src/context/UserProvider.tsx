@@ -1,7 +1,7 @@
 /**
  * This file contains the UserProvider component, which is a context provider for the user's data including the side menu data.
  */
-'use client'
+'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { SideMenuData } from '@/types/Sidebar';
@@ -50,9 +50,5 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setMenuData({ folders: updatedFolders || [] });
     };
 
-    return (
-        <SideMenuContext.Provider value={{ menuData, updateMenuData }}>
-            {children}
-        </SideMenuContext.Provider>
-    );
+    return <SideMenuContext.Provider value={{ menuData, updateMenuData }}>{children}</SideMenuContext.Provider>;
 };

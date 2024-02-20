@@ -1,8 +1,13 @@
+/**
+ * NFTs page
+ * This page is a server component and all the code is executed on the server side.
+ */
+
 import React from 'react';
 import { redirect } from 'next/navigation';
-import MainLayout from '@/components/main-layout';
-import ContentHeader from '@/components/content-header';
-import NFTsComponent from '@/components/nfts';
+import MainLayout from '@/components/layout/main-layout';
+import ContentHeader from '@/components/layout/content-header';
+import NFTsComponent from '@/components/web3/nfts';
 import { getEncryptedWeb3Wallet } from '@/utils/web3Utils';
 
 const NFTs = async () => {

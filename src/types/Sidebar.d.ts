@@ -12,4 +12,4 @@ export interface SideMenuFolder {
     name: string;
     parent_folder_id: number | null;
     subFolders: SideMenuFolder[];
-};
+}

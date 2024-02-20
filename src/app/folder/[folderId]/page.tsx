@@ -1,13 +1,24 @@
+/**
+ * The folder page
+ * This page is a server component and all the code is executed on the server side.
+ */
+
 import React from 'react';
-import MainLayout from '@/components/main-layout';
-import ContentHeader from '@/components/content-header';
+import MainLayout from '@/components/layout/main-layout';
+import ContentHeader from '@/components/layout/content-header';
 import { notFound } from 'next/navigation';
 import { ListItem } from '@/types/Item';
 import { getUserListItemsByFolderId, getFolder } from '@/services/databaseService';
 import { getItemDetail } from '@/utils/itemUtils';
-import AllItems from '@/components/all-items';
+import AllItems from '@/components/items/all-items';
 import { getUserFromSession } from '@/utils/userAccountUtils';
 
+/**
+ * Function to get the items for the folder by the folder ID
+ * Note: This function is called from the server side and not the client side
+ * @param folderId {number} The folder ID
+ * @returns {Promise<ListItem[]>} The items for the folder
+ */
 const getItemsByFolderId = async (folderId: number) => {
     const user = await getUserFromSession();
 
@@ -18,7 +29,7 @@ const getItemsByFolderId = async (folderId: number) => {
 
         // Loop through the items and get the details
         const listItems: ListItem[] = [];
-        items.forEach(item => {
+        items.forEach((item) => {
             listItems.push(getItemDetail(item));
         });
 
@@ -29,6 +40,12 @@ const getItemsByFolderId = async (folderId: number) => {
     }
 };
 
+/**
+ * Function to get the folder detail by the folder ID
+ * Note: This function is called from the server side and not the client side
+ * @param folderId {number} The folder ID
+ * @returns {Promise<Folder | null>} The folder detail or null if not found or error
+ */
 const getFolderDetail = async (folderId: number) => {
     const user = await getUserFromSession();
 
@@ -62,11 +79,8 @@ const Folder = async ({ params }: { params: { folderId: string } }) => {
             <MainLayout showSearchBar={false}>
                 <ContentHeader title={folder.name} />
 
-                <div className="relative flex justify-center pt-10" style={{ height: 'calc(100vh - 144px)' }}>
-                    {items && (
-                        <AllItems items={items} />
-                    )}
-                    
+                <div className='relative flex justify-center pt-10' style={{ height: 'calc(100vh - 144px)' }}>
+                    {items && <AllItems items={items} />}
                 </div>
             </MainLayout>
         </>

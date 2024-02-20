@@ -3,20 +3,20 @@ export interface EncryptedFile {
     salt: string;
     filename: string;
     filetype: string;
-};
+}
 
 export interface DecryptedFile {
     decryptedBuffer: Buffer;
     filename: string;
     filetype: string;
-};
+}
 
 export interface EncryptedWalletProps {
     encryptedWallet: string;
 }
 
 export interface DisplayTransaction {
-    hash: string,
+    hash: string;
     datetime: string;
     displayAddress: string;
     direction: string;

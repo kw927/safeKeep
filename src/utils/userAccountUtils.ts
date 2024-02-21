@@ -1,6 +1,3 @@
-import { getServerSession } from 'next-auth/next';
-import { getUserByEmail } from '@/services/databaseService';
-
 /**
  * Function to validate the password strength
  * @param password {string}
@@ -41,25 +38,4 @@ export const validateEmail = (email: string) => {
     const emailRegex =
         /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
     return emailRegex.test(email);
-};
-
-/**
- * Function to get the user from the next auth session
- * @returns {User | null} The user or null if the user is not found
- */
-export const getUserFromSession = async () => {
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
-        console.error('No session or user email found');
-        return null;
-    }
-
-    const user = await getUserByEmail(session.user.email);
-    if (!user) {
-        console.error('No user found with the email from session');
-        return null;
-    }
-
-    return user;
 };

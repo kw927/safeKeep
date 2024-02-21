@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ValidationError } from '@/types/ValidationError';
-import { getUserFromSession } from '@/utils/userAccountUtils';
+import { getUserFromSession } from '@/utils/userSessionUtils';
 import Stripe from 'stripe';
 
 /**

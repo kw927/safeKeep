@@ -2,6 +2,8 @@ import { render, waitFor } from '@testing-library/react';
 import Home from '../src/app/page';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 // Mocks the libraries
 jest.mock('next-auth/react');

@@ -1,11 +1,19 @@
 import { getUserByEmail, getUserItemById, getUserListItemsByFolderId, getFolder, getUserFolders } from '@/services/databaseService';
 import {
-    createTestUser, removeTestUser,
-    createTestItem, removeTestItem,
-    testItems, createTestItems, removeTestItems, removeTestFolder,
-    generateTestUser, generateTestItem
+    createTestUser,
+    removeTestUser,
+    createTestItem,
+    removeTestItem,
+    testItems,
+    createTestItems,
+    removeTestItems,
+    removeTestFolder,
+    generateTestUser,
+    generateTestItem,
 } from '@/utils/testUtils';
 import { PrismaClient } from '@prisma/client';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 /**
  * Test suite for the database service getUserByEmail function
@@ -91,7 +99,7 @@ describe('Database service getUserItemById Function', () => {
         expect(item).toMatchObject({
             item_id: createdItemId,
             name: testItem.name,
-            description: testItem.description
+            description: testItem.description,
         });
 
         // This is for TypeScript to know that item is not null
@@ -148,7 +156,7 @@ describe('Database service getUserListItemsByFolderId Function', () => {
         parent_folder_id: null,
         user_id: 0,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
     };
 
     beforeAll(async () => {
@@ -162,7 +170,7 @@ describe('Database service getUserListItemsByFolderId Function', () => {
         // Create a test folder in the database
         testFolder.user_id = createdUserId;
         const createdFolder = await prisma.folder.create({
-            data: testFolder
+            data: testFolder,
         });
 
         createdFolderId = createdFolder.folder_id;
@@ -197,12 +205,12 @@ describe('Database service getUserListItemsByFolderId Function', () => {
         }
 
         // Verify the details of the retrieved items to ensure they match the test data
-        items.forEach(item => {
+        items.forEach((item) => {
             // Check if the item ID is one of the created test items
             expect(createdItemIds).toContain(item.item_id);
 
             // Check if the name match the test items
-            const testItem = testItems.find(testItem => testItem.name === item.name);
+            const testItem = testItems.find((testItem) => testItem.name === item.name);
             expect(testItem).not.toBeUndefined();
         });
     });
@@ -218,7 +226,6 @@ describe('Database service getUserListItemsByFolderId Function', () => {
         // Expect no items to be retrieved from a non-existent folder
         expect(items.length).toBe(0);
     });
-
 });
 
 /**
@@ -237,7 +244,7 @@ describe('Database service getFolder Function', () => {
         parent_folder_id: null,
         user_id: 0,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
     };
 
     beforeAll(async () => {
@@ -252,7 +259,7 @@ describe('Database service getFolder Function', () => {
         // Create a test folder in the database
         testFolder.user_id = testUserId;
         const createdFolder = await prisma.folder.create({
-            data: testFolder
+            data: testFolder,
         });
 
         testFolderId = createdFolder.folder_id;
@@ -299,6 +306,9 @@ describe('Database service getFolder Function', () => {
             last_name: 'User',
             email: 'another.folder.test@safekeep.com',
             password_hash: 'passwordhash',
+            password: 'password',
+            totp_secret: 'JEXUU2IEJYQESEQM',
+            encrypted_totp_secret: '3ef629331641a35e7cc84bbf896b9e3eU2FsdGVkX18bJRZdF1YQTI2Wvj21k9vLUVcxWnhxFPTkefd2xkIB0jrbRyOf9/bM',
         });
 
         // Attempt to retrieve the test folder belonging to another user
@@ -323,19 +333,22 @@ describe('Database service getUserFolders Function', () => {
 
     let testUserId: number;
 
-    const testFolders = [{
-        name: 'Test Folder 00000001',
-        parent_folder_id: null,
-        user_id: 0,
-        created_at: new Date(),
-        updated_at: new Date()
-    }, {
-        name: 'Test Folder 00000002',
-        parent_folder_id: null,
-        user_id: 0,
-        created_at: new Date(),
-        updated_at: new Date()
-    }];
+    const testFolders = [
+        {
+            name: 'Test Folder 00000001',
+            parent_folder_id: null,
+            user_id: 0,
+            created_at: new Date(),
+            updated_at: new Date(),
+        },
+        {
+            name: 'Test Folder 00000002',
+            parent_folder_id: null,
+            user_id: 0,
+            created_at: new Date(),
+            updated_at: new Date(),
+        },
+    ];
 
     beforeAll(async () => {
         // Remove the test user from the database if they exist
@@ -349,7 +362,7 @@ describe('Database service getUserFolders Function', () => {
 
             // Create a test folder in the database
             const createdFolder = await prisma.folder.create({
-                data: testFolders[i]
+                data: testFolders[i],
             });
         }
     });
@@ -385,6 +398,9 @@ describe('Database service getUserFolders Function', () => {
             last_name: 'User',
             email: 'another.folder.test@safekeep.com',
             password_hash: 'passwordhash',
+            password: 'password',
+            totp_secret: 'JEXUU2IEJYQESEQM',
+            encrypted_totp_secret: '3ef629331641a35e7cc84bbf896b9e3eU2FsdGVkX18bJRZdF1YQTI2Wvj21k9vLUVcxWnhxFPTkefd2xkIB0jrbRyOf9/bM',
         });
 
         // Attempt to retrieve folders for the additional test user

@@ -70,7 +70,7 @@ const TotpVerifyForm = ({ email, password }: VerifyTotpFormProps) => {
                     <img className='mx-auto h-44 w-auto' src='/images/safe_keep_logo.png' alt='SafeKeep' />
 
                     {/* Form title */}
-                    <h2 className='mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900'>Entery your verification code</h2>
+                    <h2 className='mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900'>Enter your verification code</h2>
                 </div>
 
                 <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
@@ -97,6 +97,7 @@ const TotpVerifyForm = ({ email, password }: VerifyTotpFormProps) => {
                         {/* Verification button */}
                         <div>
                             <button
+                                name='verify-button'
                                 type='submit'
                                 className='flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
                             >

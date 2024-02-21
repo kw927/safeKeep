@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { saveItem, updateItem } from '@/services/databaseService';
 import { generateTestUser, createTestUser, removeTestUser } from '@/utils/testUtils';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 // Create a test user
 const testUser = generateTestUser();

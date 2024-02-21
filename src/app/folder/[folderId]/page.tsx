@@ -11,7 +11,7 @@ import { ListItem } from '@/types/Item';
 import { getUserListItemsByFolderId, getFolder } from '@/services/databaseService';
 import { getItemDetail } from '@/utils/itemUtils';
 import AllItems from '@/components/items/all-items';
-import { getUserFromSession } from '@/utils/userAccountUtils';
+import { getUserFromSession } from '@/utils/userSessionUtils';
 
 /**
  * Function to get the items for the folder by the folder ID

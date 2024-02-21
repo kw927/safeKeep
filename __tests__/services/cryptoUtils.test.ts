@@ -7,6 +7,8 @@ import {
     KEY_SIZE,
     SALT_SIZE,
 } from '@/services/cryptoUtils';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 // Password to use for testing
 const password = 'password123456789';

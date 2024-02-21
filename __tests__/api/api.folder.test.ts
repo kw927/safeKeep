@@ -1,4 +1,6 @@
 import { buildFolderHierarchy } from '@/utils/folderUtils';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 // Define the test folders
 const testFolders = [

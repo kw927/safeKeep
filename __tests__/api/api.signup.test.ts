@@ -5,6 +5,9 @@
 // Use the axios library to make requests to the API
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
+
 const prisma = new PrismaClient();
 
 // The test only works if the API is running locally on port 3000

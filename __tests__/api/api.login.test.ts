@@ -4,6 +4,8 @@
 
 import axios from 'axios';
 import { testUser, createTestUser, removeTestUser } from '@/utils/testUtils';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 // The test only works if the API is running locally on port 3000
 const API_URL = 'http://localhost:3000/api/auth/login';

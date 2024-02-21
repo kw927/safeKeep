@@ -15,7 +15,10 @@ export const testUser: TestUser = {
     first_name: 'Test',
     last_name: 'User',
     email: 'test.user@safekeep.com',
-    password_hash: '$2a$10$C3qN.vZ8zRKSgoQU2YGcT.G.V.qjeAcBaghXP0kgS3q3wxZc/nEhi',
+    password_hash: '$2a$10$KlJHEOfucMDQZdaDFuXCfemivqT6ZZNBGSI/5WvprhRDZKuH.VZsW',
+    password: 'Ab1234567890!',
+    totp_secret: 'JEXUU2IEJYQESEQM',
+    encrypted_totp_secret: '3ef629331641a35e7cc84bbf896b9e3eU2FsdGVkX18bJRZdF1YQTI2Wvj21k9vLUVcxWnhxFPTkefd2xkIB0jrbRyOf9/bM',
 };
 
 // A static test item
@@ -84,7 +87,10 @@ export const generateTestUser = () => {
         first_name: 'Test',
         last_name: `User ${postfix}`,
         email: `test.user.${postfix}@safekeep.com`,
-        password_hash: '$2a$10$C3qN.vZ8zRKSgoQU2YGcT.G.V.qjeAcBaghXP0kgS3q3wxZc/nEhi',
+        password_hash: '$2a$10$KlJHEOfucMDQZdaDFuXCfemivqT6ZZNBGSI/5WvprhRDZKuH.VZsW',
+        password: 'Ab1234567890!',
+        totp_secret: 'JEXUU2IEJYQESEQM',
+        encrypted_totp_secret: '3ef629331641a35e7cc84bbf896b9e3eU2FsdGVkX18bJRZdF1YQTI2Wvj21k9vLUVcxWnhxFPTkefd2xkIB0jrbRyOf9/bM',
     };
 
     return testUser;
@@ -125,7 +131,12 @@ export const createTestUser = async (user: TestUser) => {
 
     const newUser = await prisma.user.create({
         data: {
-            ...user,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            password_hash: user.password_hash,
+            totp_secret: user.encrypted_totp_secret,
+            totp_enabled: true,
             created_at: new Date(),
             updated_at: new Date(),
         },

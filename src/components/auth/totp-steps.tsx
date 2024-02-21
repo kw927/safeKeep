@@ -95,32 +95,67 @@ const TOTPSetps: React.FC<TOTPStepsProps> = (props) => {
     };
 
     return (
-        <>
-            {/* The display QR code step */}
+        <div className='flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8'>
+            {/* The SafeKeep logo */}
+            <img className='mx-auto h-44 w-auto' src='/images/safe_keep_logo.png' alt='SafeKeep' />
+
+            {/* Display the TOTP code and QR code */}
             <SetupStep step={Step.DisplayQrCode} current={currentStep}>
-                <>
-                    <h1>Enable two-factor authentication</h1>
-                    <p>Please scan the QR code below using an authenticator app or manually enter the code {totpData.totpSecret}</p>
+                <div className='space-y-6'>
+                    {/* Title and description */}
+                    <h2 className='mt-6 text-center text-3xl font-bold text-gray-900'>Enable Two-Factor Authentication</h2>
+                    <p className='text-gray-600'>
+                        Scan the QR code below using an authenticator app or manually enter the code {totpData.totpSecret}.
+                    </p>
 
-                    {/* Display the QR Code */}
-                    {totpData.totpQRCode && <img src={totpData.totpQRCode} alt='TOTP QR Code' />}
+                    {/* TOTP QR code */}
+                    {totpData.totpQRCode && <img className='mx-auto' src={totpData.totpQRCode} alt='TOTP QR Code' />}
 
-                    <button onClick={handleNextStep}>Continue</button>
-                </>
+                    {/* Continue button */}
+                    <div className='flex justify-center'>
+                        <button
+                            name='continue-button'
+                            className='mt-4 w-6/12 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                            onClick={handleNextStep}
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
             </SetupStep>
 
-            {/* The enter TOTP code step */}
+            {/* Enter the TOTP code to verify */}
             <SetupStep step={Step.EnterTotpCode} current={currentStep}>
-                <>
-                    <h1>Verify TOTP Code</h1>
-                    <input type='text' value={totpCode} onChange={(e) => setTotpCode(e.target.value)} placeholder='Enter your TOTP code' />
-                    <button onClick={handleVerify}>Verify</button>
-                </>
+                <div className='space-y-6 w-full text-center'>
+                    {/* Title and description */}
+                    <h2 className='text-center text-3xl font-bold text-gray-900'>Verify TOTP Code</h2>
+                    <p className='text-gray-600'>Enter the TOTP code from your authenticator app.</p>
+
+                    {/* TOTP code input */}
+                    <input
+                        className='mt-2 block w-3/4 mx-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                        type='text'
+                        name='totp-code'
+                        value={totpCode}
+                        onChange={(e) => setTotpCode(e.target.value)}
+                        placeholder='Enter your TOTP code'
+                    />
+
+                    {/* Verify button */}
+                    <div className='mt-4'>
+                        <button
+                            name='verify-button'
+                            className='w-3/4 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                            onClick={handleVerify}
+                        >
+                            Verify
+                        </button>
+                    </div>
+                </div>
             </SetupStep>
 
-            {/* Alert Dialog */}
             <AlertDialog open={isDialogVisible} setOpen={(show) => showDialog(show)} {...alertDialog} />
-        </>
+        </div>
     );
 };
 

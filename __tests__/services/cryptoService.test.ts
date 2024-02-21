@@ -3,6 +3,8 @@ import { ec as EC } from 'elliptic';
 import { generatePublicKey, signChallenge, getSaltAndPublicKey, verifySignature, validatePassword, encryptText, decryptText } from '@/services/cryptoServiceClient';
 import { generateSalt, generateKey } from '@/services/cryptoUtils';
 import { SALT_SIZE, KEY_SIZE, ITERATIONS } from '@/services/cryptoUtils';
+// Import @jest/globals to avoid conflict with cypress global types
+import { expect } from '@jest/globals';
 
 /**
  * Test suite for the generatePublicKey function    
@@ -242,9 +244,17 @@ describe('decryptText Function', () => {
 
     it('should not decrypt text with an incorrect encryption key', () => {
         const incorrectKey = 'incorrectSecretKey123';
-        const decryptedText = decryptText(encryptedText, incorrectKey);
+
+        let decryptedText = '';
+
+        try {
+            decryptedText = decryptText(encryptedText, incorrectKey);
+        } catch (error) {
+            // An error should be thrown when the key is incorrect
+        }
 
         expect(decryptedText).not.toEqual(sampleText);
+        expect(decryptedText).toEqual('');
     });
 });
 

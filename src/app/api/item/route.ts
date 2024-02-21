@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { EncryptedFile } from '@/types/Crypto';
 import { ValidationError } from '@/types/ValidationError';
-import { getUserFromSession } from '@/utils/userAccountUtils';
+import { getUserFromSession } from '@/utils/userSessionUtils';
 import { saveItem, updateItem } from '@/services/databaseService';
 
 const prisma = new PrismaClient();

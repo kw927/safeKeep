@@ -106,7 +106,6 @@ const TOTPSetup = async () => {
     // Render the TOTP setup page
     return (
         <div>
-            <h1>TOTPSetup</h1>
             <TOTPSetps totpData={totpData} />
         </div>
     );

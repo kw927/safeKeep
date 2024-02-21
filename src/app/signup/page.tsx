@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import SignUpFrom from '@/components/sign-up-form';
+import SignUpFrom from '@/components/auth/sign-up-form';
 
 const SignUp = () => {
     return (

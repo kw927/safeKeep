@@ -41,7 +41,10 @@ const TopNavAndContent = ({ children, setSidebarOpen, showSearchBar }: TopNavPro
         await removeMasterPasswordFromServiceWorker();
 
         // Sign out the user
-        signOut();
+        await signOut();
+
+        // Redirect to the login page
+        window.location.href = '/';
     };
 
     return (

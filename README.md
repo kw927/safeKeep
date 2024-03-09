@@ -36,6 +36,12 @@ yarn install
 pnpm install
 ```
 
+Run the migrations using the following command:
+
+```bash
+npx prisma migrate dev
+``````
+
 Finally, run the development server using one of the following commands:
 
 ```bash

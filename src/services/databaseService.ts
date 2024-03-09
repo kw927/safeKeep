@@ -246,6 +246,9 @@ export const saveItem = async (
 
             return item.item_id;
         });
+
+        // The result is the item id
+        return result;
     } catch (error) {
         throw new Error('Error saving the item');
     }

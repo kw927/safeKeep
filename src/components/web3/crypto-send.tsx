@@ -136,7 +136,7 @@ const SendCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
         setLoadingMessage('Fetching wallet data...');
         setIsLoading(true);
 
-        // We will decrypt the wallet from the encrypted wallet every when we need to use it
+        // We will decrypt the wallet from the encrypted wallet every time when we need to use it
         // This is to ensure that the wallet is not stored in the local storage and minimise the risk of being hacked
         const decryptedWallet = await decryptWallet(encryptedWallet);
 
@@ -222,7 +222,7 @@ const SendCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
         }
 
         // Get the decrypted wallet
-        // We will decrypt the wallet from the encrypted wallet every when we need to use it
+        // We will decrypt the wallet from the encrypted wallet every time when we need to use it
         // This is to ensure that the wallet is not stored in the local storage and minimise the risk of being hacked
         const decryptedWallet = await decryptWallet(encryptedWallet);
 
@@ -334,7 +334,7 @@ const SendCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
     const getGasPrice = async () => {
         try {
             // Get the decrypted wallet
-            // We will decrypt the wallet from the encrypted wallet every when we need to use it
+            // We will decrypt the wallet from the encrypted wallet every time when we need to use it
             // This is to ensure that the wallet is not stored in the local storage and minimise the risk of being hacked
             const decryptedWallet = await decryptWallet(encryptedWallet);
 
@@ -403,7 +403,7 @@ const SendCryptoComponent = ({ encryptedWallet }: EncryptedWalletProps) => {
         setIsLoading(true);
 
         // Get the decrypted wallet
-        // We will decrypt the wallet from the encrypted wallet every when we need to use it
+        // We will decrypt the wallet from the encrypted wallet every time when we need to use it
         // This is to ensure that the wallet is not stored in the local storage and minimise the risk of being hacked
         const decryptedWallet = await decryptWallet(encryptedWallet);
 

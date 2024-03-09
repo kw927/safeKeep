@@ -26,10 +26,19 @@ export const useAlertDialog = () => {
     ) => {
         setIsDialogVisible(show);
         if (dialogState) {
+            const customOnClick = dialogState.onButtonClick;
+            
             setAlertDialog((prevState) => ({
                 ...prevState,
                 ...dialogState,
-                onButtonClick: () => setIsDialogVisible(false),
+                onButtonClick: () => {
+                    // Check if a custom function is provided
+                    if (customOnClick) {
+                        customOnClick();
+                    }
+                    // To ensures the dialog is closed after the custom function is executed
+                    setIsDialogVisible(false);
+                },
             }));
         }
     };
